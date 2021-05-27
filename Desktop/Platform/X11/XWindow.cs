@@ -25,6 +25,7 @@ namespace SE.Hyperion.Desktop.X11
         public override bool HasBorder { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
         public override WindowState State { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
         public override bool AppearsInTaskbar { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+        public override bool TopMost { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
 
         public override bool Create()
         {
@@ -42,6 +43,11 @@ namespace SE.Hyperion.Desktop.X11
         }
         
         public override void Close()
+        {
+            throw new NotImplementedException();
+        }
+
+        public override bool ProcessEvent()
         {
             throw new NotImplementedException();
         }

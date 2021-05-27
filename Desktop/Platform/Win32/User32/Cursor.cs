@@ -7,17 +7,11 @@ using System.Runtime.InteropServices;
 
 namespace SE.Hyperion.Desktop.Win32
 {
-    public partial class Clipboard
+    public partial class Cursor
     {
         const string User32 = "user32.dll";
 
         [DllImport(User32, SetLastError = true)]
-        protected static extern bool OpenClipboard(IntPtr owner);
-
-        [DllImport(User32, SetLastError = true)]
-        protected static extern bool EmptyClipboard();
-
-        [DllImport(User32, SetLastError = true)]
-        protected static extern bool CloseClipboard();
+        protected static extern IntPtr LoadCursor(IntPtr instance, IntPtr cursorName);
     }
 }

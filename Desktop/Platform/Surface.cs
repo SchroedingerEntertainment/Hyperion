@@ -11,7 +11,7 @@ namespace SE.Hyperion.Desktop
     /// <summary>
     /// A planar area, managed by the operation system
     /// </summary>
-    public abstract class Surface
+    public abstract class Surface : FinalizerObject
     {
         protected IntPtr handle;
         /// <summary>
@@ -54,6 +54,11 @@ namespace SE.Hyperion.Desktop
         /// Gets or sets if the Surface supports user resizing
         /// </summary>
         public abstract bool CanResize { get; set; }
+
+        /// <summary>
+        /// Gets or Sets if the Surface should stay always on top
+        /// </summary>
+        public abstract bool TopMost { get; set; }
         #endregion
 
         #region Appearance
@@ -98,6 +103,12 @@ namespace SE.Hyperion.Desktop
         /// </summary>
         public Surface()
         { }
+
+        [MethodImpl(OptimizationExtensions.ForceInline)]
+        public static implicit operator bool(Surface surface)
+        {
+            return (surface.Handle != IntPtr.Zero);
+        }
 
         #region Events
         public virtual void OnColorChanged()
@@ -186,7 +197,13 @@ namespace SE.Hyperion.Desktop
         /// <returns>True if not associated to an instance and a new one was
         /// created, false otherwise"/></returns>
         public abstract bool Create();
-        
+
+        /// <summary>
+        /// Tries to process the next outstanding message from the message queue
+        /// </summary>
+        /// <returns>True if all messages have been processed properly, false otherwise</returns>
+        public abstract bool ProcessEvent();
+
         /// <summary>
         /// Translates the provided point into Sufrace coordinates
         /// </summary>
