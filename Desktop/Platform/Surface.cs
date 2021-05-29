@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Drawing;
+using System.Threading;
 
 namespace SE.Hyperion.Desktop
 {
@@ -21,6 +22,26 @@ namespace SE.Hyperion.Desktop
         {
             [MethodImpl(OptimizationExtensions.ForceInline)]
             get { return handle; }
+        }
+        
+        protected atomic_bool dirtyFlag;
+        /// <summary>
+        /// Gets the state of the dirty flag
+        /// </summary>
+        public bool Dirty
+        {
+            [MethodImpl(OptimizationExtensions.ForceInline)]
+            get { return dirtyFlag.UnsafeValue; }
+        }
+
+        protected bool sizeMoveFlag;
+        /// <summary>
+        /// Gets the state of the size-move flag
+        /// </summary>
+        public bool SizeMove
+        {
+            [MethodImpl(OptimizationExtensions.ForceInline)]
+            get { return sizeMoveFlag; }
         }
 
         /// <summary>
@@ -110,6 +131,12 @@ namespace SE.Hyperion.Desktop
             return (surface.Handle != IntPtr.Zero);
         }
 
+        [MethodImpl(OptimizationExtensions.ForceInline)]
+        public static implicit operator Graphics(Surface surface)
+        {
+            return Graphics.FromHwnd(surface.handle);
+        }
+
         #region Events
         public virtual void OnColorChanged()
         { }
@@ -124,70 +151,73 @@ namespace SE.Hyperion.Desktop
         { }
 
         #region Positioning
-        public virtual void OnMove()
+        protected virtual void OnMove()
         { }
 
-        public virtual void OnResize()
+        protected virtual void OnResize()
         { }
         #endregion
 
         #region Appearance
-        public virtual void OnIconChanged()
+        protected virtual void OnIconChanged()
         { }
 
-        public virtual void OnTitleChanged()
+        protected virtual void OnTitleChanged()
         { }
 
-        public virtual void OnBorderChanged()
+        protected virtual void OnBorderChanged()
         { }
 
-        public virtual void OnStateChanged()
+        protected virtual void OnStateChanged()
         { }
         #endregion
 
         #region Key Events
-        public virtual void OnKeyDown()
+        protected virtual void OnKeyDown()
         { }
 
-        public virtual void OnKeyPress()
+        protected virtual void OnKeyPress()
         { }
 
-        public virtual void OnKeyUp()
+        protected virtual void OnKeyUp()
         { }
         #endregion
 
         #region Mouse Events
-        public virtual void OnMouseEnter()
+        protected virtual void OnMouseEnter()
         { }
 
-        public virtual void OnMouseLeave()
+        protected virtual void OnMouseLeave()
         { }
 
-        public virtual void OnMouseDown()
+        protected virtual void OnMouseDown()
         { }
 
-        public virtual void OnMouseUp()
+        protected virtual void OnMouseUp()
         { }
 
-        public virtual void OnMouseMove()
+        protected virtual void OnMouseMove()
         { }
 
-        public virtual void OnMouseWheel()
+        protected virtual void OnMouseWheel()
         { }
         #endregion
 
         #region Drag n Drop
-        public virtual void OnDragEnter()
+        protected virtual void OnDragEnter()
         { }
 
-        public virtual void OnDragDrop()
+        protected virtual void OnDragDrop()
         { }
 
-        public virtual void OnDragLeave()
+        protected virtual void OnDragLeave()
         { }
         #endregion
 
-        public virtual void OnClosed()
+        protected virtual void OnFlushBuffer()
+        { }
+
+        protected virtual void OnClosed()
         { }
         #endregion
 
@@ -199,10 +229,32 @@ namespace SE.Hyperion.Desktop
         public abstract bool Create();
 
         /// <summary>
+        /// Enables the Surface transparency level if possible
+        /// </summary>
+        /// <param name="mask">The desired transparency level</param>
+        /// <returns>The supported transparency level set from the platform</returns>
+        public abstract TransparencyMask SetTransparencyMask(TransparencyMask mask);
+
+        /// <summary>
         /// Tries to process the next outstanding message from the message queue
         /// </summary>
         /// <returns>True if all messages have been processed properly, false otherwise</returns>
         public abstract bool ProcessEvent();
+
+        /// <summary>
+        /// Begins processing of an outstanding repaint request and clears the dirty flag
+        /// </summary>
+        /// <returns>True if a request has been processed, false otherwise</returns>
+        [MethodImpl(OptimizationExtensions.ForceInline)]
+        public bool ProcessRepaint()
+        {
+            if (dirtyFlag.Exchange(false))
+            {
+                OnFlushBuffer();
+                return true;
+            }
+            else return false;
+        }
 
         /// <summary>
         /// Translates the provided point into Sufrace coordinates

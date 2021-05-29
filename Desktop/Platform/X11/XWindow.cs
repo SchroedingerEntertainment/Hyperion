@@ -51,5 +51,10 @@ namespace SE.Hyperion.Desktop.X11
         {
             throw new NotImplementedException();
         }
+
+        public override TransparencyMask SetTransparencyMask(TransparencyMask mask)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

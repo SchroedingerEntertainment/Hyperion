@@ -4,7 +4,6 @@
 using System;
 using System.Collections.Generic;
 using System.Drawing;
-using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
@@ -51,38 +50,58 @@ namespace SE.Hyperion.Desktop.Win32
         }
         bool CreateInstance()
         {
-            IntPtr instance = Marshal.GetHINSTANCE(typeof(Window).Module);
             if (atom == 0)
             {
                 WindowClassEx cls = WindowClassEx.Create();
-                cls.style = ClassStyles.CS_OWNDC;
+                cls.style = ClassStyles.CS_VREDRAW | ClassStyles.CS_HREDRAW;
                 cls.lpfnWndProc = wndProc;
-                cls.hInstance = instance;
+                cls.hInstance = GetModuleHandle(null);
                 cls.hCursor = Cursor.Default;
-                cls.hbrBackground = GetStockObject(StockObject.WHITE_BRUSH);
                 cls.lpszClassName = Guid.NewGuid().ToString();
+                
+                //cls.hbrBackground = GetStockObject(StockObject.WHITE_BRUSH);
 
                 atom = RegisterClassEx(ref cls);
             }
             if (atom != 0)
             {
-                handle = CreateWindowEx(0, atom, null, WindowStyles.WS_OVERLAPPEDWINDOW, 0, 0, 300, 300, IntPtr.Zero, IntPtr.Zero, instance, IntPtr.Zero);
+                handle = CreateWindowEx(0, atom, null, WindowStyles.WS_OVERLAPPEDWINDOW, 0, 0, 300, 300, IntPtr.Zero, IntPtr.Zero, IntPtr.Zero, IntPtr.Zero);
                 return (handle != IntPtr.Zero);
             }
             else return false;
         }
 
-        IntPtr WndProc(IntPtr handle, WindowMessage msg, IntPtr wParam, IntPtr lParam)
+        IntPtr WndProc(IntPtr hwnd, WindowMessage msg, IntPtr wParam, IntPtr lParam)
         {
             switch (msg)
             {
+                case WindowMessage.WM_ENTERSIZEMOVE:
+                    {
+                        sizeMoveFlag = true;
+                    }
+                    break;
+                case WindowMessage.WM_EXITSIZEMOVE:
+                    {
+                        sizeMoveFlag = false;
+                    }
+                    break;
+                case WindowMessage.WM_PAINT:
+                case WindowMessage.WM_SYNCPAINT:
+                    {
+                        if (!sizeMoveFlag)
+                        {
+                            dirtyFlag.Exchange(true);
+                        }
+                        else OnFlushBuffer();
+                    }
+                    break;
                 case WindowMessage.WM_DESTROY:
                     {
-                        this.handle = IntPtr.Zero;
+                        handle = IntPtr.Zero;
                     }
                     break;
             }
-            return DefWindowProc(handle, msg, wParam, lParam);
+            return DefWindowProc(hwnd, msg, wParam, lParam);
         }
         
         public override bool ProcessEvent()
@@ -96,10 +115,138 @@ namespace SE.Hyperion.Desktop.Win32
             else return true;
         }
 
+        public override TransparencyMask SetTransparencyMask(TransparencyMask mask)
+        {
+            if (Shared.OsVersion.Major >= 6)
+            {
+                bool enabled; if (DwmIsCompositionEnabled(out enabled) != 0 || !enabled)
+                {
+                    return TransparencyMask.None;
+                }
+                else if (Shared.OsVersion.Major >= 10)
+                {
+                    return SetTransparencyMask_W10(mask);
+                }
+                else if (Shared.OsVersion.Minor >= 2)
+                {
+                    return SetTransparencyMask_Composition(mask);
+                }
+                else return SetTransparencyMask_DWM(mask);
+            }
+            else return TransparencyMask.None;
+        }
+        TransparencyMask SetTransparencyMask_W10(TransparencyMask mask)
+        {
+            AccentPolicy policy = new AccentPolicy();
 
+            switch (mask)
+            {
+                case TransparencyMask.AcrylicBlur:
+                    {
+                        if (Shared.OsVersion.Major <= 10 && Shared.OsVersion.Build < 19628)
+                        {
+                            mask = TransparencyMask.Blur;
+                            goto case TransparencyMask.Blur;
+                        }
+                        else policy.AccentState = AccentState.ACCENT_ENABLE_ACRYLIC;
+                    }
+                    break;
+                case TransparencyMask.Blur:
+                    {
+                        policy.AccentState = AccentState.ACCENT_ENABLE_BLURBEHIND;
+                    }
+                    break;
+                case TransparencyMask.Transparent:
+                    {
+                        policy.AccentState = AccentState.ACCENT_ENABLE_TRANSPARENTGRADIENT;
+                    }
+                    break;
+                default:
+                    {
+                        policy.AccentState = AccentState.ACCENT_DISABLED;
+                    }
+                    break;
+            }
 
+            policy.AccentFlags = 2;
+            policy.GradientColor = 0x01000000;
 
+            int policySize = Marshal.SizeOf(policy);
+            IntPtr policyPtr = Marshal.AllocHGlobal(policySize);
+            Marshal.StructureToPtr(policy, policyPtr, false);
 
+            WindowCompositionAttributeData data = new WindowCompositionAttributeData();
+            data.Attribute = WindowCompositionAttribute.WCA_ACCENT_POLICY;
+            data.SizeOfData = policySize;
+            data.Data = policyPtr;
+
+            SetWindowCompositionAttribute(handle, ref data);
+
+            Marshal.FreeHGlobal(policyPtr);
+            return mask;
+        }
+        TransparencyMask SetTransparencyMask_Composition(TransparencyMask mask)
+        {
+            AccentPolicy policy = new AccentPolicy();
+            switch (mask)
+            {
+                case TransparencyMask.AcrylicBlur:
+                    {
+                        mask = TransparencyMask.Blur;
+                    }
+                    goto default;
+                case TransparencyMask.Transparent:
+                    {
+                        policy.AccentState = AccentState.ACCENT_ENABLE_BLURBEHIND;
+                    }
+                    break;
+                default:
+                    {
+                        policy.AccentState = AccentState.ACCENT_DISABLED;
+                    }
+                    break;
+            }
+
+            int policySize = Marshal.SizeOf(policy);
+            IntPtr policyPtr = Marshal.AllocHGlobal(policySize);
+            Marshal.StructureToPtr(policy, policyPtr, false);
+
+            WindowCompositionAttributeData data = new WindowCompositionAttributeData();
+            data.Attribute = WindowCompositionAttribute.WCA_ACCENT_POLICY;
+            data.SizeOfData = policySize;
+            data.Data = policyPtr;
+
+            SetWindowCompositionAttribute(handle, ref data);
+            Marshal.FreeHGlobal(policyPtr);
+
+            if (mask == TransparencyMask.Blur)
+            {
+                SetTransparencyMask_DWM(mask);
+            }
+            return mask;
+        }
+        TransparencyMask SetTransparencyMask_DWM(TransparencyMask mask)
+        {
+            BlurBehind nfo = new BlurBehind();
+            switch (mask)
+            {
+                case TransparencyMask.AcrylicBlur:
+                case TransparencyMask.Transparent:
+                case TransparencyMask.Blur:
+                    {
+                        mask = TransparencyMask.Blur;
+                        nfo.Enable = true;
+                    }
+                    goto default;
+                default:
+                    {
+                        DwmEnableBlurBehindWindow(handle, ref nfo);
+                    }
+                    return mask;
+            }
+        }
+
+        
 
         public override Color Color { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
         public override bool Enabled { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }

@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 
 namespace SE.Hyperion.Desktop.Win32
 {
@@ -14,6 +15,7 @@ namespace SE.Hyperion.Desktop.Win32
         /// </summary>
         public static IntPtr Default
         {
+            [MethodImpl(OptimizationExtensions.ForceInline)]
             get { return @default; }
         }
 

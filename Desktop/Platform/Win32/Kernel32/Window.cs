@@ -7,8 +7,11 @@ using System.Runtime.InteropServices;
 
 namespace SE.Hyperion.Desktop.Win32
 {
-    internal partial class Shared
+    public partial class Window
     {
-        
+        const string Kernel32 = "kernel32.dll";
+
+        [DllImport(Kernel32)]
+        public static extern IntPtr GetModuleHandle(string lpModuleName);
     }
 }

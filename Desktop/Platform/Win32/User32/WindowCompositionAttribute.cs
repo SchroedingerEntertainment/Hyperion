@@ -3,12 +3,13 @@
 
 using System;
 using System.Collections.Generic;
-using System.Runtime.InteropServices;
 
 namespace SE.Hyperion.Desktop.Win32
 {
-    internal partial class Shared
+    public enum WindowCompositionAttribute
     {
-        
+        // ...
+        WCA_ACCENT_POLICY = 19
+        // ...
     }
 }

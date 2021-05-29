@@ -9,6 +9,9 @@ namespace SE.Hyperion.Desktop.Win32
 {
     internal partial class Shared
     {
-        
+        const string NtDll = "ntdll";
+
+        [DllImport(NtDll, SetLastError = true)]
+        public static extern int RtlGetVersion(ref OsVersionInfoEx lpVersionInformation);
     }
 }

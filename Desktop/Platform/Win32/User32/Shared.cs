@@ -7,7 +7,7 @@ using System.Runtime.InteropServices;
 
 namespace SE.Hyperion.Desktop.Win32
 {
-    public partial class Shared
+    internal partial class Shared
     {
         
     }

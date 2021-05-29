@@ -20,10 +20,13 @@ namespace SE.Hyperion.Desktop.Win32
         [DllImport(User32, SetLastError = true)]
         protected static extern IntPtr CreateWindowEx(WindowStylesEx styleEx, uint atom, string windowName, WindowStyles style, int x, int y, int width, int height, IntPtr parent, IntPtr menu, IntPtr instance, IntPtr param);
 
+        [DllImport(User32, SetLastError = true)]
+        internal static extern int SetWindowCompositionAttribute(IntPtr hwnd, ref WindowCompositionAttributeData data);
+
         [DllImport(User32, EntryPoint = "DefWindowProcW")]
         protected extern static IntPtr DefWindowProc(IntPtr handle, WindowMessage msg, IntPtr wParam, IntPtr lParam);
 
-        [DllImport("user32.dll")]
+        [DllImport(User32)]
         [return: MarshalAs(UnmanagedType.Bool)]
         public static extern bool PeekMessage(ref Message message, IntPtr handle, uint minFilter, uint maxFilter, uint removeMessageFilter);
 

@@ -7,8 +7,12 @@ using System.Runtime.InteropServices;
 
 namespace SE.Hyperion.Desktop.Win32
 {
-    internal partial class Shared
+    [StructLayout(LayoutKind.Sequential)]
+    public struct AccentPolicy
     {
-        
+        public AccentState AccentState;
+        public int AccentFlags;
+        public int GradientColor;
+        public int AnimationId;
     }
 }
