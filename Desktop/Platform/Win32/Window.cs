@@ -59,8 +59,6 @@ namespace SE.Hyperion.Desktop.Win32
                 cls.hCursor = Cursor.Default;
                 cls.lpszClassName = Guid.NewGuid().ToString();
                 
-                //cls.hbrBackground = GetStockObject(StockObject.WHITE_BRUSH);
-
                 atom = RegisterClassEx(ref cls);
             }
             if (atom != 0)
@@ -125,7 +123,7 @@ namespace SE.Hyperion.Desktop.Win32
                 }
                 else if (Shared.OsVersion.Major >= 10)
                 {
-                    return SetTransparencyMask_W10(mask);
+                    return SetTransparencyMask_Gradient(mask);
                 }
                 else if (Shared.OsVersion.Minor >= 2)
                 {
@@ -135,7 +133,7 @@ namespace SE.Hyperion.Desktop.Win32
             }
             else return TransparencyMask.None;
         }
-        TransparencyMask SetTransparencyMask_W10(TransparencyMask mask)
+        TransparencyMask SetTransparencyMask_Gradient(TransparencyMask mask)
         {
             AccentPolicy policy = new AccentPolicy();
 
