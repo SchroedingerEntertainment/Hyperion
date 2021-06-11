@@ -7,11 +7,14 @@ using System.Runtime.InteropServices;
 
 namespace SE.Hyperion.Desktop.Win32
 {
-    public partial class Window
+    public static partial class Window
     {
         const string Gdi32 = "gdi32.dll";
 
         [DllImport(Gdi32)]
-        protected static extern IntPtr GetStockObject(StockObject obj);
+        public static extern IntPtr GetStockObject(StockObject obj);
+
+        [DllImport(Gdi32, SetLastError = true)]
+        public static extern int SetDIBitsToDevice(IntPtr hDC, int xDest, int yDest, int dwWidth, int dwHeight, int XSrc, int YSrc, int uStartScan, int cScanLines, IntPtr lpvBits, ref BitmapInfo lpbmi, uint fuColorUse);
     }
 }

@@ -12,7 +12,7 @@ namespace SE.Hyperion.Desktop
     {
         private static IClipboard instance;
 
-        static Clipboard()
+        /*static Clipboard()
         {
             if ((Application.Platform & PlatformName.Windows) == PlatformName.Windows)
             {
@@ -20,7 +20,7 @@ namespace SE.Hyperion.Desktop
                 instance = new Win32.Clipboard();
             }
             else instance = new X11.Clipboard();
-        }
+        }*/
 
         /// <summary>
         /// 

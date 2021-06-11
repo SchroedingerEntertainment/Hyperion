@@ -4,48 +4,99 @@
 using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
+using System.Text;
 
 namespace SE.Hyperion.Desktop.Win32
 {
-    public partial class Window
+    public static partial class Window
     {
-        public delegate IntPtr WndProcPtr(IntPtr handle, WindowMessage msg, IntPtr wParam, IntPtr lParam);
+        public delegate IntPtr WndProcPtr(IntPtr hWnd, WindowMessage msg, IntPtr wParam, IntPtr lParam);
+        public const int CW_USEDEFAULT = unchecked((int)0x80000000);
 
-        const string User32 = "user32.dll";
+        private const string User32 = "user32.dll";
 
         [DllImport(User32, SetLastError = true, CharSet = CharSet.Unicode, EntryPoint = "RegisterClassExW")]
         [return: MarshalAs(UnmanagedType.U2)]
-        protected static extern ushort RegisterClassEx(ref WindowClassEx wndClass);
+        public static extern ushort RegisterClassEx(ref WindowClassEx wndClass);
 
         [DllImport(User32, SetLastError = true)]
-        protected static extern IntPtr CreateWindowEx(WindowStylesEx styleEx, uint atom, string windowName, WindowStyles style, int x, int y, int width, int height, IntPtr parent, IntPtr menu, IntPtr instance, IntPtr param);
+        public static extern IntPtr CreateWindowEx(WindowStylesEx styleEx, uint atom, string windowName, WindowStyles style, int x, int y, int width, int height, IntPtr parent, IntPtr menu, IntPtr instance, IntPtr param);
 
         [DllImport(User32, SetLastError = true)]
-        internal static extern int SetWindowCompositionAttribute(IntPtr hwnd, ref WindowCompositionAttributeData data);
+        public static extern int SetWindowCompositionAttribute(IntPtr hwnd, ref WindowCompositionAttributeData data);
+
+        [DllImport(User32, SetLastError = true, CharSet = CharSet.Unicode)]
+        public static extern IntPtr SetWindowLongPtr(IntPtr hwnd, WindowLongIndexFlags nIndex, IntPtr dwNewLong);
+
+        [DllImport(User32, SetLastError = true)]
+        public static extern int SetWindowLong(IntPtr hwnd, WindowLongIndexFlags nIndex, int dwNewLong);
+
+        [DllImport(User32, SetLastError = true, CharSet = CharSet.Unicode)]
+        public static extern IntPtr GetWindowLongPtr(IntPtr hwnd, WindowLongIndexFlags nIndex);
+
+        [DllImport(User32, SetLastError = true)]
+        public static extern int GetWindowLong(IntPtr hwnd, WindowLongIndexFlags nIndex);
 
         [DllImport(User32, EntryPoint = "DefWindowProcW")]
-        protected extern static IntPtr DefWindowProc(IntPtr handle, WindowMessage msg, IntPtr wParam, IntPtr lParam);
+        public extern static IntPtr DefWindowProc(IntPtr hWnd, WindowMessage msg, IntPtr wParam, IntPtr lParam);
 
-        [DllImport(User32)]
+        [DllImport(User32, SetLastError = true, CharSet = CharSet.Unicode)]
         [return: MarshalAs(UnmanagedType.Bool)]
-        public static extern bool PeekMessage(ref Message message, IntPtr handle, uint minFilter, uint maxFilter, uint removeMessageFilter);
+        public static extern bool PeekMessage(ref Message message, IntPtr hWnd, uint minFilter, uint maxFilter, uint removeMessageFilter);
 
-        [DllImport(User32)]
+        [DllImport(User32, SetLastError = true, CharSet = CharSet.Unicode)]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        public static extern bool PostMessage(IntPtr hWnd, WindowMessage msg, IntPtr wParam, IntPtr lParam);
+
+        [DllImport(User32, SetLastError = true, CharSet = CharSet.Unicode)]
+        public static extern IntPtr SendMessage(IntPtr hWnd, WindowMessage msg, IntPtr wParam, IntPtr lParam);
+
+        [DllImport(User32, SetLastError = true)]
         [return: MarshalAs(UnmanagedType.Bool)]
         public static extern bool TranslateMessage(ref Message message);
         
-        [DllImport(User32, EntryPoint = "DispatchMessageW")]
+        [DllImport(User32, SetLastError = true, EntryPoint = "DispatchMessageW")]
         public static extern IntPtr DispatchMessage(ref Message message);
-
-        [DllImport(User32)]
-        public static extern bool ShowWindow(IntPtr handle, ShowWindowCommand command);
 
         [DllImport(User32, SetLastError = true)]
         [return: MarshalAs(UnmanagedType.Bool)]
-        protected static extern bool DestroyWindow(IntPtr handle);
+        public static extern bool GetClientRect(IntPtr hWnd, out Rect lpRect);
+
+        [DllImport(User32, SetLastError = true)]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        public static extern bool ClientToScreen(IntPtr hWnd, ref Point lpPoint);
+
+        [DllImport(User32, SetLastError = true)]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        public static extern bool ScreenToClient(IntPtr hWnd, ref Point lpPoint);
+
+        [DllImport(User32, SetLastError = true)]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        public static extern bool SetWindowPos(IntPtr hWnd, IntPtr hWndInsertAfter, int X, int Y, int cx, int cy, SetWindowPosFlags uFlags);
+
+        [DllImport(User32, SetLastError = true)]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        public static extern bool SetForegroundWindow(IntPtr hWnd);
+
+        [DllImport(User32, SetLastError = true, CharSet = CharSet.Unicode)]
+        public static extern int GetWindowTextLength(IntPtr hWnd);
+        
+        [DllImport(User32, SetLastError = true, CharSet = CharSet.Unicode)]
+        public static extern int GetWindowText(IntPtr hWnd, StringBuilder lpString, int nMaxCount);
+        
+        [DllImport(User32, SetLastError = true, CharSet = CharSet.Unicode)]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        public static extern bool SetWindowText(IntPtr hWnd, string lpString);
+
+        [DllImport(User32, SetLastError = true)]
+        public static extern bool ShowWindow(IntPtr hWnd, ShowWindowCommand command);
+
+        [DllImport(User32, SetLastError = true)]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        public static extern bool DestroyWindow(IntPtr hWnd);
         
         [DllImport(User32, SetLastError = true)]
         [return: MarshalAs(UnmanagedType.Bool)]
-        protected static extern bool UnregisterClass(uint atom, IntPtr instance);
+        public static extern bool UnregisterClass(uint atom, IntPtr instance);
     }
 }

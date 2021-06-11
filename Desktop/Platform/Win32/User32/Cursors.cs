@@ -7,7 +7,7 @@ using System.Collections.Generic;
 namespace SE.Hyperion.Desktop.Win32
 {
     /// <summary>
-    /// Represents system predefined cursors.
+    /// Represents system predefined cursors
     /// </summary>
     public enum Cursors
     {

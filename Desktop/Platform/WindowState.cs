@@ -9,7 +9,7 @@ namespace SE.Hyperion.Desktop
     /// <summary>
     /// 
     /// </summary>
-    public enum WindowState : byte
+    public enum WindowState : short
     {
         Normal = 0,
         Minimized,

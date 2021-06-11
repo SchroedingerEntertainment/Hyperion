@@ -9,6 +9,8 @@ namespace SE.Hyperion.Desktop.Win32
     [Flags]
     public enum WindowStylesEx : int
     {
+        Default = 0,
+
         /// <summary>
         /// Specifies a window that accepts drag-drop files.
         /// </summary>

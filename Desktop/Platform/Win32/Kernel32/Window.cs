@@ -7,7 +7,7 @@ using System.Runtime.InteropServices;
 
 namespace SE.Hyperion.Desktop.Win32
 {
-    public partial class Window
+    public static partial class Window
     {
         const string Kernel32 = "kernel32.dll";
 

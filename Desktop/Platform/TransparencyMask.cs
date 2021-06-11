@@ -9,7 +9,7 @@ namespace SE.Hyperion.Desktop
     /// <summary>
     /// 
     /// </summary>
-    public enum TransparencyMask : byte
+    public enum TransparencyMask : short
     {
         /// <summary>
         /// The window background is opaque
