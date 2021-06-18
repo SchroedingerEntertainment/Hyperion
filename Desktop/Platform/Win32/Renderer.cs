@@ -18,7 +18,7 @@ namespace SE.Hyperion.Desktop.Win32
 
         BitmapInfo bi;
 
-        public Renderer([Generator(GeneratorFlag.Implicit)] ISurface host)
+        public Renderer([Generator(GeneratorFlag.Implicit)] IPlatformObject host)
         {
             this.buffer = new RenderBuffer();
             this.bi = new BitmapInfo();
@@ -41,7 +41,7 @@ namespace SE.Hyperion.Desktop.Win32
             }
         }
 
-        public void OnFlushBuffer([Generator(GeneratorFlag.Implicit)] ISurface host)
+        public void OnFlushBuffer([Generator(GeneratorFlag.Implicit)] IPlatformObject host)
         {
             if (buffer)
             {

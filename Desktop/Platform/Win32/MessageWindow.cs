@@ -10,7 +10,7 @@ using SE.Mixin;
 
 namespace SE.Hyperion.Desktop.Win32
 {
-    internal struct Connector : IDisposable
+    internal struct MessageWindow : IDisposable
     {
         private readonly Window.WndProcPtr wndProc;
         private ushort atom;
@@ -18,13 +18,13 @@ namespace SE.Hyperion.Desktop.Win32
         [Access(AccessFlag.Get)]
         public IntPtr handle;
 
-        public Connector([Generator(GeneratorFlag.Implicit)] IWin32Surface host)
+        public MessageWindow([Generator(GeneratorFlag.Implicit)] IPlatformObject host)
         {
-            this.wndProc = null;
+            this.wndProc = WndProc;
 
             WindowClassEx cls = WindowClassEx.Create();
             cls.lpszClassName = Guid.NewGuid().ToString();
-            cls.lpfnWndProc = Window.DefWindowProc;
+            cls.lpfnWndProc = wndProc;
 
             this.atom = Window.RegisterClassEx(ref cls);
             if (atom != 0)
@@ -51,8 +51,26 @@ namespace SE.Hyperion.Desktop.Win32
             }
         }
 
-        public IntPtr WndProc(IntPtr hwnd, WindowMessage msg, IntPtr wParam, IntPtr lParam)
+        private static IntPtr WndProc(IntPtr hwnd, WindowMessage msg, IntPtr wParam, IntPtr lParam)
         {
+            switch (msg)
+            {
+                #region Destroy
+                case WindowMessage.WM_DESTROY:
+                    {
+                        Window.PostMessage(IntPtr.Zero, msg, IntPtr.Zero, hwnd);
+                    }
+                    break;
+                #endregion
+
+                #region TrayIcon
+                case WindowMessage.WM_NOTIFY_EVENT:
+                    {
+                        Window.PostMessage(IntPtr.Zero, (WindowMessage)lParam.LoWord(), wParam, hwnd);
+                    }
+                    break;
+                #endregion
+            }
             return Window.DefWindowProc(hwnd, msg, wParam, lParam);
         }
     }

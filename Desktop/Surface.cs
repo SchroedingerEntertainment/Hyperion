@@ -10,16 +10,13 @@ using SE.Mixin;
 
 namespace SE.Hyperion.Desktop
 {
-    public abstract class Surface : FinalizerObject, ISurface
+    public abstract class Surface : FinalizerObject, IPlatformObject, ISurface
     {
         public abstract IntPtr Handle
         {
             get;
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
         public virtual Rectangle Bounds
         {
             [MethodImpl(OptimizationExtensions.ForceInline)]
@@ -71,15 +68,15 @@ namespace SE.Hyperion.Desktop
             get;
         }
 
-        public virtual SurfaceFlags Flags
+        public virtual Appearance Appearance
         {
             [MethodImpl(OptimizationExtensions.ForceInline)]
             get { throw new NotImplementedException(); }
             [MethodImpl(OptimizationExtensions.ForceInline)]
-            set { SetFlags(value); }
+            set { SetAppearance(value); }
         }
 
-        public virtual TransparencyMask Transparency
+        public virtual Transparency Transparency
         {
             [MethodImpl(OptimizationExtensions.ForceInline)]
             get { throw new NotImplementedException(); }
@@ -87,9 +84,6 @@ namespace SE.Hyperion.Desktop
             set { SetTransparency(value); }
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
         public virtual WindowState State
         {
             [MethodImpl(OptimizationExtensions.ForceInline)]
@@ -98,9 +92,6 @@ namespace SE.Hyperion.Desktop
             set { SetState(value); }
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
         public virtual string Title
         {
             [MethodImpl(OptimizationExtensions.ForceInline)]
@@ -109,9 +100,6 @@ namespace SE.Hyperion.Desktop
             set { SetTitle(value); }
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
         public virtual bool Visible
         {
             [MethodImpl(OptimizationExtensions.ForceInline)]
@@ -129,9 +117,9 @@ namespace SE.Hyperion.Desktop
                 if ((Application.Platform & PlatformName.Windows) == PlatformName.Windows)
                 {
                     //TODO - Chekc if X11 can be used on Windows (using VcXsrv) as well and provide an option to do so
-                    Compositor.DeclareType<Surface>(typeof(Win32.Surface), typeof(Win32.Renderer));
+                    Compositor.DeclareType<Surface>(typeof(Win32.Window), typeof(Win32.Renderer));
                 }
-                else Compositor.DeclareType<Surface>(typeof(X11.Surface), typeof(Renderer));
+                else Compositor.DeclareType<Surface>(typeof(X11.Window), typeof(Renderer));
             #if DEBUG
             }
             catch(Exception er)
@@ -153,9 +141,9 @@ namespace SE.Hyperion.Desktop
 
         public abstract void SetBounds(int x, int y, int width, int height);
 
-        public abstract void SetFlags(SurfaceFlags mask);
+        public abstract void SetAppearance(Appearance flags);
 
-        public abstract void SetTransparency(TransparencyMask transparency);
+        public abstract void SetTransparency(Transparency transparency);
 
         public abstract void SetState(WindowState state);
 

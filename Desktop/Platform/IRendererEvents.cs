@@ -4,16 +4,13 @@
 using System;
 using System.Collections.Generic;
 using System.Drawing;
-using System.Runtime.CompilerServices;
-
-[assembly: InternalsVisibleTo("Mixin")]
 
 namespace SE.Hyperion.Desktop
 {
     /// <summary>
     /// 
     /// </summary>
-    internal interface IRendererEvents
+    public interface IRendererEvents
     {
         /// <summary>
         /// 

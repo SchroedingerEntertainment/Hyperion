@@ -10,7 +10,7 @@ namespace SE.Hyperion.Desktop
     /// 
     /// </summary>
     [Flags]
-    public enum SurfaceFlags : short
+    public enum Appearance : short
     {
         Icon = 0x1,
         Taskbar = 0x2,

@@ -10,23 +10,14 @@ namespace SE.Hyperion.Desktop
     /// <summary>
     /// 
     /// </summary>
-    public interface ISurfaceEvents
+    public interface IPlatform
     {
         /// <summary>
         /// 
         /// </summary>
-        void OnCreated();
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="point"></param>
-        void OnMove(Point point);
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="visible"></param>
-        void OnVisibleChanged(bool visible);
+        /// <param name="id"></param>
+        /// <param name="e"></param>
+        /// <param name="cursor"></param>
+        void OnTrayEvent(Int64 id, TrayEvent e, Point cursor);
     }
 }

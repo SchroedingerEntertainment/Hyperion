@@ -3,23 +3,17 @@
 
 using System;
 using System.Collections.Generic;
-using System.Runtime.CompilerServices;
 
 namespace SE.Hyperion.Desktop
 {
     /// <summary>
     /// 
     /// </summary>
-    public interface IWindowEvents
+    public enum TrayEvent : byte
     {
-        /// <summary>
-        /// 
-        /// </summary>
-        void OnTitleChanged();
+        Click = 0,
+        DoubleClick,
 
-        /// <summary>
-        /// 
-        /// </summary>
-        void OnStateChanged(WindowState state);
+        RightClick
     }
 }

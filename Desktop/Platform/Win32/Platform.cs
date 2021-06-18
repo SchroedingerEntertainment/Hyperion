@@ -1,6 +1,7 @@
 ﻿// Copyright (C) 2017 Schroedinger Entertainment
 // Distributed under the Schroedinger Entertainment EULA (See EULA.md for details)
 
+using SE.Mixin;
 using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
@@ -8,7 +9,7 @@ using System.Runtime.InteropServices;
 
 namespace SE.Hyperion.Desktop.Win32
 {
-    internal partial class Platform
+    public static partial class Platform
     {
         private readonly static Version osVersion;
         /// <summary>
@@ -20,14 +21,14 @@ namespace SE.Hyperion.Desktop.Win32
             get { return osVersion; }
         }
 
-        private readonly static Connector defaultConnector;
+        private readonly static MessageWindow messageReceiver;
         /// <summary>
         /// 
         /// </summary>
-        public static IntPtr DefaultConnector
+        public static IntPtr MessageReceiver
         {
             [MethodImpl(OptimizationExtensions.ForceInline)]
-            get { return defaultConnector.handle; }
+            get { return messageReceiver.handle; }
         }
 
         static Platform()
@@ -38,7 +39,7 @@ namespace SE.Hyperion.Desktop.Win32
                 osVersion = new Version(osverinfo.dwMajorVersion, osverinfo.dwMinorVersion, osverinfo.dwBuildNumber);
             }
             else osVersion = new Version();
-            defaultConnector = new Connector(null);
+            messageReceiver = new MessageWindow(null);
         }
 
         [MethodImpl(OptimizationExtensions.ForceInline)]
@@ -46,6 +47,41 @@ namespace SE.Hyperion.Desktop.Win32
         {
             int errorCode = Marshal.GetLastWin32Error();
             return new ExternalException(System.Runtime.Platform.GetWin32ErrorMessage(errorCode), errorCode);
+        }
+
+        public static bool ProcessEvent([Generator(GeneratorFlag.Implicit)] IPlatform host)
+        {
+            Message msg = new Message();
+            if (Window.PeekMessage(ref msg, IntPtr.Zero, 0, 0, 1))
+            {
+                if(msg.hwnd == IntPtr.Zero)
+                {
+                    switch (msg.message)
+                    {
+                        #region TrayIcon
+                        case WindowMessage.WM_LBUTTONUP:
+                            {
+                                host.OnTrayEvent(unchecked((long)msg.lParam), TrayEvent.Click, msg.wParam.ToPoint());
+                            }
+                            break;
+                        case WindowMessage.WM_LBUTTONDBLCLK:
+                            {
+                                host.OnTrayEvent(unchecked((long)msg.lParam), TrayEvent.DoubleClick, msg.wParam.ToPoint());
+                            }
+                            break;
+                        case WindowMessage.WM_RBUTTONUP:
+                            {
+                                host.OnTrayEvent(unchecked((long)msg.lParam), TrayEvent.RightClick, msg.wParam.ToPoint());
+                            }
+                            break;
+                        #endregion
+                    }
+                }
+                Window.TranslateMessage(ref msg);
+                Window.DispatchMessage(ref msg);
+                return true;
+            }
+            else return false;
         }
     }
 }

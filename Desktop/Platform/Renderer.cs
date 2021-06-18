@@ -17,7 +17,7 @@ namespace SE.Hyperion.Desktop
         [Access(AccessFlag.Get)]
         public readonly RenderBuffer buffer;
 
-        public Renderer([Generator(GeneratorFlag.Implicit)] ISurface host)
+        public Renderer([Generator(GeneratorFlag.Implicit)] IPlatformObject host)
         {
             this.buffer = new RenderBuffer();
         }
@@ -31,7 +31,7 @@ namespace SE.Hyperion.Desktop
             buffer.Resize(Math.Max(32, host.ClientRect.Width.NextPowerOfTwo()), Math.Max(32, host.ClientRect.Height.NextPowerOfTwo()));
         }
 
-        public void OnFlushBuffer([Generator(GeneratorFlag.Implicit)] ISurface host)
+        public void OnFlushBuffer([Generator(GeneratorFlag.Implicit)] IPlatformObject host)
         {
             if (buffer)
             {

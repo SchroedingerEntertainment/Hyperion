@@ -15,22 +15,17 @@ namespace SE.Hyperion.Desktop
         /// <summary>
         /// 
         /// </summary>
-        IntPtr Handle { get; }
-
-        /// <summary>
-        /// 
-        /// </summary>
         Rectangle Bounds { get; }
 
         /// <summary>
         /// 
         /// </summary>
-        SurfaceFlags Flags { get; }
+        Appearance Appearance { get; }
 
         /// <summary>
         /// 
         /// </summary>
-        TransparencyMask Transparency { get; }
+        Transparency Transparency { get; }
 
         /// <summary>
         /// 
@@ -50,13 +45,13 @@ namespace SE.Hyperion.Desktop
         /// 
         /// </summary>
         /// <param name="flags"></param>
-        void SetFlags(SurfaceFlags flags);
+        void SetAppearance(Appearance flags);
 
         /// <summary>
         /// 
         /// </summary>
         /// <param name="transparency"></param>
-        void SetTransparency(TransparencyMask transparency);
+        void SetTransparency(Transparency transparency);
 
         /// <summary>
         /// 

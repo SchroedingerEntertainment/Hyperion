@@ -5,14 +5,12 @@ using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 
-[assembly: InternalsVisibleTo("Mixin")]
-
 namespace SE.Hyperion.Desktop.Win32
 {
     /// <summary>
     /// 
     /// </summary>
-    internal interface IWin32Surface : ISurfaceEvents, IRendererEvents, IWindowEvents
+    public interface IWindow : IPlatformObject, ISurfaceEvents, IRendererEvents, IWindowEvents, ITrayIconHostEvents
     {
         /// <summary>
         /// 
@@ -23,6 +21,6 @@ namespace SE.Hyperion.Desktop.Win32
         /// <param name="wParam"></param>
         /// <param name="lParam"></param>
         /// <returns></returns>
-        IntPtr WndProc(IWin32Surface host, IntPtr hwnd, WindowMessage msg, IntPtr wParam, IntPtr lParam);
+        IntPtr WndProc(IWindow host, IntPtr hwnd, WindowMessage msg, IntPtr wParam, IntPtr lParam);
     }
 }

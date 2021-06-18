@@ -3,17 +3,17 @@
 
 using System;
 using System.Collections.Generic;
-using System.Runtime.CompilerServices;
 
-[assembly: InternalsVisibleTo("Mixin")]
-
-namespace SE.Hyperion.Desktop.Win32
+namespace SE.Hyperion.Desktop
 {
     /// <summary>
     /// 
     /// </summary>
-    internal interface ITrayIcon
+    public interface IPlatformObject
     {
-
+        /// <summary>
+        /// 
+        /// </summary>
+        IntPtr Handle { get; }
     }
 }

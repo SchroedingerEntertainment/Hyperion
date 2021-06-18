@@ -1225,5 +1225,10 @@ namespace SE.Hyperion.Desktop.Win32
         /// A top-level window is being replaced. The window exists when the system calls this hook.
         /// </summary>
         WM_HSHELL_WINDOWREPLACED = 13,
+
+        /// <summary>
+        /// A window receives this message from a related NotifyIcon
+        /// </summary>
+        WM_NOTIFY_EVENT = WM_APP + 1,
     }
 }

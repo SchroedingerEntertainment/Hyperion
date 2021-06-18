@@ -10,7 +10,7 @@ using SE.Mixin;
 
 namespace SE.Hyperion.Desktop.X11
 {
-    public struct Surface : IDisposable
+    public struct Window : IDisposable
     {
         [Access(AccessFlag.Get)]
         public IntPtr handle;

@@ -8,7 +8,7 @@ using System.Text;
 
 namespace SE.Hyperion.Desktop.Win32
 {
-    public static partial class Window
+    public partial struct Window
     {
         public delegate IntPtr WndProcPtr(IntPtr hWnd, WindowMessage msg, IntPtr wParam, IntPtr lParam);
         public const int CW_USEDEFAULT = unchecked((int)0x80000000);

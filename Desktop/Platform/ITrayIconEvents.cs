@@ -3,25 +3,23 @@
 
 using System;
 using System.Collections.Generic;
-using System.Drawing;
 
 namespace SE.Hyperion.Desktop
 {
     /// <summary>
     /// 
     /// </summary>
-    public interface ISurfaceEvents
+    public interface ITrayIconEvents
     {
         /// <summary>
         /// 
         /// </summary>
-        void OnCreated();
+        void OnIconChanged();
 
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="point"></param>
-        void OnMove(Point point);
+        void OnTooltipChanged();
 
         /// <summary>
         /// 
