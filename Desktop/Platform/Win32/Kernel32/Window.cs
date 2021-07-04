@@ -11,7 +11,7 @@ namespace SE.Hyperion.Desktop.Win32
     {
         const string Kernel32 = "kernel32.dll";
 
-        [DllImport(Kernel32)]
+        [DllImport(Kernel32, SetLastError = true, CharSet = CharSet.Auto)]
         public static extern IntPtr GetModuleHandle(string lpModuleName);
     }
 }

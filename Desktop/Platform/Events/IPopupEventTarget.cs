@@ -3,21 +3,17 @@
 
 using System;
 using System.Collections.Generic;
-using System.Drawing;
 
 namespace SE.Hyperion.Desktop
 {
     /// <summary>
     /// 
     /// </summary>
-    public interface ITrayIconHostEvents
+    public interface IPopupEventTarget
     {
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="e"></param>
-        /// <param name="cursor"></param>
-        /// <returns></returns>
-        bool OnTrayEvent(TrayEvent e, Point cursor);
+        void OnPopupClose();
     }
 }

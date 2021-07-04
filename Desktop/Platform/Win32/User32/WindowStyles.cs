@@ -6,10 +6,6 @@ using System.Collections.Generic;
 
 namespace SE.Hyperion.Desktop.Win32
 {
-    /// <summary>
-    /// Window Styles. The following styles can be specified wherever a window style is required.
-    /// After the control has been created, these styles cannot be modified, except as noted.
-    /// </summary>
     [Flags]
     public enum WindowStyles : uint
     {

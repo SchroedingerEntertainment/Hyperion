@@ -9,40 +9,36 @@ namespace SE.Hyperion.Desktop
     /// <summary>
     /// 
     /// </summary>
-    public interface IWindow
+    public enum MouseButton : byte
     {
         /// <summary>
-        /// 
+        /// No button pressed
         /// </summary>
-        WindowState State
-        {
-            get;
-        }
+        None = 0,
 
         /// <summary>
-        /// 
+        /// The left mouse button
         /// </summary>
-        string Title
-        {
-            get;
-        }
+        Left = 1,
 
         /// <summary>
-        /// 
+        /// The middle mouse button
         /// </summary>
-        /// <returns></returns>
-        string GetTitle();
+        Middle = 2,
 
         /// <summary>
-        /// 
+        /// The right mouse button
         /// </summary>
-        /// <param name="title"></param>
-        void SetTitle(string title);
+        Right = 3,
 
         /// <summary>
-        /// 
+        /// The first XButton (XBUTTON1) on Microsoft IntelliMouse Explorer
         /// </summary>
-        /// <param name="newState"></param>
-        void SetState(WindowState state);
+        XButton1 = 4,
+
+        /// <summary>
+        /// The second XButton (XBUTTON2) on Microsoft IntelliMouse Explorer
+        /// </summary>
+        XButton2 = 5,
     }
 }

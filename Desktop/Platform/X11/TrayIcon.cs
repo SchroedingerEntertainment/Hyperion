@@ -11,7 +11,7 @@ namespace SE.Hyperion.Desktop.X11
 {
     public struct TrayIcon : IDisposable
     {
-        [Access(AccessFlag.Get)]
+        [ReadOnly]
         public IntPtr handle;
 
         public void Dispose()

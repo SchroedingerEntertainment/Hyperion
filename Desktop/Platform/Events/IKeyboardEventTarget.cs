@@ -3,24 +3,24 @@
 
 using System;
 using System.Collections.Generic;
-using System.Drawing;
 
 namespace SE.Hyperion.Desktop
 {
     /// <summary>
     /// 
     /// </summary>
-    public interface IRendererEvents
+    public interface IKeyboardEventTarget
     {
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="size"></param>
-        void OnResize(Size size);
+        /// <param name="button"></param>
+        void OnKeyDown(Key key);
 
         /// <summary>
         /// 
         /// </summary>
-        void OnFlushBuffer();
+        /// <param name="button"></param>
+        void OnKeyUp(Key key);
     }
 }

@@ -3,28 +3,39 @@
 
 using System;
 using System.Collections.Generic;
+using System.Drawing;
 
 namespace SE.Hyperion.Desktop
 {
     /// <summary>
     /// 
     /// </summary>
-    public interface ITrayIconEvents
+    public interface ITrayEventTarget
     {
         /// <summary>
         /// 
         /// </summary>
-        void OnIconChanged();
+        /// <param name="icon"></param>
+        void OnIconChanged(Icon icon);
 
         /// <summary>
         /// 
         /// </summary>
-        void OnTooltipChanged();
+        /// <param name="title"></param>
+        void OnTooltipChanged(string title);
 
         /// <summary>
         /// 
         /// </summary>
         /// <param name="visible"></param>
         void OnVisibleChanged(bool visible);
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="event"></param>
+        /// <param name="cursor"></param>
+        /// <returns></returns>
+        bool OnTrayEvent(TrayEvent @event, Point cursor);
     }
 }

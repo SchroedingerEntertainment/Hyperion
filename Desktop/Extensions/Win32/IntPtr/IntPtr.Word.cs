@@ -18,9 +18,9 @@ namespace SE.Hyperion.Desktop.Win32
             long number = unchecked((long)ptr);
             if ((number & 0x80000000) == 0x80000000)
             {
-                return (int)(number >> 16);
+                return (short)(number >> 16);
             }
-            else return (int)(number >> 16) & 0xffff;
+            else return (short)(number >> 16) & 0xffff;
         }
 
         /// <summary>
@@ -29,7 +29,7 @@ namespace SE.Hyperion.Desktop.Win32
         [MethodImpl(OptimizationExtensions.ForceInline)]
         public static int LoWord(this IntPtr ptr)
         {
-            return (int)(unchecked((long)ptr) & 0xffff);
+            return (short)(unchecked((long)ptr) & 0xffff);
         }
     }
 }

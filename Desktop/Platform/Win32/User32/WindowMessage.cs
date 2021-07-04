@@ -9,7 +9,7 @@ namespace SE.Hyperion.Desktop.Win32
     /// <summary>
     /// Windows Messages
     /// Defined in winuser.h from Windows SDK v6.1
-    /// Documentation pulled from MSDN.
+    /// Documentation pulled from MSDN
     /// </summary>
     public enum WindowMessage : uint
     {

@@ -2,89 +2,102 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
+using System.Drawing.Drawing2D;
 using System.Threading;
-using SE.Hyperion.Desktop;
+using SE.Reactive;
 
 namespace SE.Hyperion.Drawing
 {
     class Program
     {
-        /*const int FPS = 60;
+        internal static string mouse = string.Empty;
+        internal static bool close;
+
+        const int FPS = 40;
         const int FrameTime = 1000 / FPS;
-
-        private readonly static List<Surface> surfaces;
-        private static Spinlockʾ surfaceLock;
-
-        static Program()
-        {
-            surfaces = new List<Surface>();
-            surfaceLock = new Spinlockʾ();
-        }
-
-        static void Run()
-        {
-            bool hasMessages;
-            Stopwatch sw = Stopwatch.StartNew();
-            do
-            {
-                surfaceLock.Lock();
-                try
-                {
-                    do
-                    {
-                        hasMessages = false;
-                        for (int i = 0; i < surfaces.Count; i++)
-                        {
-                            if (surfaces[i])
-                            {
-                                hasMessages |= !surfaces[i].ProcessEvent();
-                            }
-                            else
-                            {
-                                surfaces.SwapRemove(i);
-                                i--;
-                            }
-                        }
-                    }
-                    while (hasMessages);
-                    for (int i = 0; i < surfaces.Count; i++)
-                    {
-                        surfaces[i].ProcessRepaint();
-                    }
-                }
-                finally
-                {
-                    surfaceLock.Release();
-                }
-                Thread.Sleep(Math.Max(0, FrameTime - (int)sw.ElapsedMilliseconds));
-                sw.Reset();
-            }
-            while (surfaces.Count > 0);
-        }*/
 
         static void Main()
         {
+            Bitmap bmp = new Bitmap(1, 1);
+            using (Graphics g = Graphics.FromImage(bmp))
+                g.Clear(Color.Purple);
+
+            Icon ico = Icon.FromHandle(bmp.GetHicon());
+
+            /*TrayIcon icon = TrayIcon.Create();
+            icon.Icon = ico;
+            icon.Visible = true;*/
+            
+            RectangleF clip = RectangleF.Empty;
+            GraphicsPath path = new GraphicsPath();
+
             Surface surface = Surface.Create();
-            surface.SetBounds(150, 150, 300, 300);
-            surface.Transparency = TransparencyMask.Blur;
-            surface.Title = "Hello World";
-            surface.Initialize();
-            surface.Visible = true;
-
-            Desktop.Win32.TrayIcon icon = new Desktop.Win32.TrayIcon();
-            icon.Initialize(surface);
-            icon.SetIcon(SystemIcons.WinLogo);
-
-            while (surface.Handle != IntPtr.Zero)
+            Surface.SizeProperty.When(surface, (id, instance) => id.Related(instance)).Subscribe((id) =>
             {
-                while (!Desktop.Win32.Window.ProcessEvent())
+                using (Graphics g = Graphics.FromImage(surface.Buffer.RenderTarget))
+                {
+                    path.Reset();
+                    path.AddString("Hello World", SystemFonts.DefaultFont.FontFamily, (int)FontStyle.Regular, 32, Point.Empty, StringFormat.GenericDefault);
+                    RectangleF bounds = path.GetBounds();
+
+                    g.SetClip(clip);
+                    g.Clear(Color.Transparent);
+                    g.ResetClip();
+
+                    clip = RectangleF.Union(Rectangle.Empty, bounds);
+                    clip.Offset((surface.ClientRect.Width - clip.Width) / 2, (surface.ClientRect.Height - clip.Height) / 2);
+                    clip.Inflate(2, 2);
+
+                    g.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
+                    g.TranslateTransform(clip.X, clip.Y);
+                    g.FillPath(Brushes.Black, path);
+
+                    surface.Invalidate();
+                }
+
+            });
+            Surface.CloseEvent.When(surface, (e, instance) => e.Related(instance)).Subscribe((e) =>
+            {
+                close = true;
+
+            });
+            surface.SetBounds(150, 150, 300, 300);
+            surface.Transparency = Desktop.Transparency.Blur;
+            surface.Title = "Hello World";
+            surface.Icon = ico;
+            surface.Visible = true;
+            surface.Initialize();
+            
+            /*long iconId = icon.Id;
+            WeakReference<Surface> ic = new WeakReference<Surface>(surface, false);
+            IDisposable dp = TrayIcon.RightClickEvent.Where((e) => e.Sender == iconId).Subscribe((e) =>
+            {
+                Point origin = TrayIcon.RightClickEvent.GetData(ref e);
+                surface.SetBounds(origin.X, origin.Y - 300, 100, 300);
+                surface.Visible = true;
+                surface.SetOrder(true);
+                
+            });*/
+
+            Stopwatch sw = Stopwatch.StartNew();
+            sw.Start();
+
+            while (!close)
+            {
+                while (MessageInterface.GetNext())
                     ;
-                while (surface.Redraw())
-                    ;
-                Thread.Sleep(15);
+                if (surface.Handle != IntPtr.Zero)
+                {
+                    if (surface.Dirty)
+                        surface.Redraw();
+                }
+                Thread.Sleep(Math.Max(0, FrameTime - (int)sw.ElapsedMilliseconds));
+                sw.Reset();
+                sw.Start();
             }
 
-            icon.Dispose();
+            surface.Dispose();
+            //icon.Dispose();
         }
     }
 }

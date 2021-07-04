@@ -58,6 +58,9 @@ namespace SE.Hyperion.Desktop.Win32
         [DllImport(User32, SetLastError = true, EntryPoint = "DispatchMessageW")]
         public static extern IntPtr DispatchMessage(ref Message message);
 
+        [DllImport(User32, SetLastError = true, CharSet = CharSet.Unicode)]
+        public static extern int RegisterWindowMessage(string lpString);
+
         [DllImport(User32, SetLastError = true)]
         [return: MarshalAs(UnmanagedType.Bool)]
         public static extern bool GetClientRect(IntPtr hWnd, out Rect lpRect);
@@ -75,6 +78,12 @@ namespace SE.Hyperion.Desktop.Win32
         public static extern bool SetWindowPos(IntPtr hWnd, IntPtr hWndInsertAfter, int X, int Y, int cx, int cy, SetWindowPosFlags uFlags);
 
         [DllImport(User32, SetLastError = true)]
+        public static extern IntPtr SetActiveWindow(IntPtr hWnd);
+
+        [DllImport(User32, SetLastError = true)]
+        public static extern IntPtr SetFocus(IntPtr hWnd);
+
+        [DllImport(User32, SetLastError = true)]
         [return: MarshalAs(UnmanagedType.Bool)]
         public static extern bool SetForegroundWindow(IntPtr hWnd);
 
@@ -90,6 +99,9 @@ namespace SE.Hyperion.Desktop.Win32
 
         [DllImport(User32, SetLastError = true)]
         public static extern bool ShowWindow(IntPtr hWnd, ShowWindowCommand command);
+
+        [DllImport(User32, SetLastError = true, EntryPoint = "MapVirtualKeyW")]
+        public static extern int MapVirtualKey([MarshalAs(UnmanagedType.U4)] int uCode, [MarshalAs(UnmanagedType.U4)] VirtualKeyMap uMapType);
 
         [DllImport(User32, SetLastError = true)]
         [return: MarshalAs(UnmanagedType.Bool)]

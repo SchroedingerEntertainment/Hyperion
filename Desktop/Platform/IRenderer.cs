@@ -10,7 +10,7 @@ namespace SE.Hyperion.Desktop
     /// <summary>
     /// 
     /// </summary>
-    public interface IRenderer
+    public interface IRenderer : IPlatformObject
     {
         /// <summary>
         /// 
@@ -23,7 +23,7 @@ namespace SE.Hyperion.Desktop
         /// <summary>
         /// 
         /// </summary>
-        bool SizeMove
+        RenderBuffer Buffer
         {
             get;
         }
@@ -39,15 +39,9 @@ namespace SE.Hyperion.Desktop
         /// <summary>
         /// 
         /// </summary>
-        bool Resizable
+        bool SizeMove
         {
             get;
         }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <returns></returns>
-        bool Redraw();
     }
 }

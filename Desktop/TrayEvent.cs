@@ -14,6 +14,8 @@ namespace SE.Hyperion.Desktop
         Click = 0,
         DoubleClick,
 
-        RightClick
+        RightClick,
+
+        Redraw,
     }
 }

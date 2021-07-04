@@ -11,14 +11,14 @@ using SE.Mixin;
 
 namespace SE.Hyperion.Desktop.Win32
 {
-    internal struct Renderer : IDisposable
+    public struct RendererComponent : IDisposable
     {
-        [Access(AccessFlag.Get)]
+        [ReadOnly]
         public readonly RenderBuffer buffer;
 
         BitmapInfo bi;
 
-        public Renderer([Generator(GeneratorFlag.Implicit)] IPlatformObject host)
+        public RendererComponent([Implicit(true)] IRenderWindow host)
         {
             this.buffer = new RenderBuffer();
             this.bi = new BitmapInfo();
@@ -28,7 +28,8 @@ namespace SE.Hyperion.Desktop.Win32
             buffer.Dispose();
         }
 
-        public void OnResize([Generator(GeneratorFlag.Implicit)] IRenderer host, Size size)
+        [Multicast]
+        public void OnResize([Implicit(true)] IRenderWindow host, Size size)
         {
             if (buffer.Resize(Math.Max(32, host.ClientRect.Width.NextPowerOfTwo()), Math.Max(32, host.ClientRect.Height.NextPowerOfTwo())))
             {
@@ -41,9 +42,9 @@ namespace SE.Hyperion.Desktop.Win32
             }
         }
 
-        public void OnFlushBuffer([Generator(GeneratorFlag.Implicit)] IPlatformObject host)
+        public void OnFlushBuffer([Implicit] IRenderWindow host)
         {
-            if (buffer)
+            if (host.Handle != IntPtr.Zero)
             {
                 using (Graphics g = Graphics.FromHwnd(host.Handle))
                 {

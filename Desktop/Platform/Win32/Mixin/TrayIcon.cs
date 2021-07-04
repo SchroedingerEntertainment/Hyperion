@@ -13,19 +13,19 @@ namespace SE.Hyperion.Desktop.Win32
     {
         Guid guid;
 
-        [Access(AccessFlag.Get)]
+        [ReadOnly]
         public IntPtr handle;
 
-        [Access(AccessFlag.Get)]
+        [ReadOnly]
         public Icon icon;
 
-        [Access(AccessFlag.Get)]
+        [ReadOnly]
         public string tooltip;
 
-        [Access(AccessFlag.Get)]
+        [ReadOnly]
         public bool visible;
 
-        public TrayIcon([Generator(GeneratorFlag.Default)] IPlatformObject host)
+        public TrayIcon([Implicit] IPlatformObject host)
         {
             this.handle = (host != null) ? host.Handle : Platform.MessageReceiver;
             this.tooltip = string.Empty;
@@ -43,7 +43,7 @@ namespace SE.Hyperion.Desktop.Win32
         }
 
         [MethodImpl(OptimizationExtensions.ForceInline)]
-        public void SetIcon([Generator(GeneratorFlag.Implicit)] ITrayIconEvents eventHandler, Icon value)
+        public void SetIcon([Implicit] ITrayEventTarget host, Icon value)
         {
             if (handle != IntPtr.Zero && visible)
             {
@@ -54,15 +54,17 @@ namespace SE.Hyperion.Desktop.Win32
                     data.uFlags |= NotifyFlags.NIF_SHOWTIP;
                 }
                 data.hIcon = value.Handle;
-
                 NotifyIcon.Shell_NotifyIcon(NotifyMessage.NIM_MODIFY, ref data);
             }
             icon = value;
-            eventHandler.OnIconChanged();
+            if (host != null)
+            {
+                host.OnIconChanged(value);
+            }
         }
 
         [MethodImpl(OptimizationExtensions.ForceInline)]
-        public void SetTooltip([Generator(GeneratorFlag.Implicit)] ITrayIconEvents eventHandler, string value)
+        public void SetTooltip([Implicit] ITrayEventTarget host, string value)
         {
             if (handle != IntPtr.Zero && visible)
             {
@@ -76,11 +78,14 @@ namespace SE.Hyperion.Desktop.Win32
                 NotifyIcon.Shell_NotifyIcon(NotifyMessage.NIM_MODIFY, ref data);
             }
             tooltip = value;
-            eventHandler.OnTooltipChanged();
+            if (host != null)
+            {
+                host.OnTooltipChanged(value);
+            }
         }
 
         [MethodImpl(OptimizationExtensions.ForceInline)]
-        public void SetVisible([Generator(GeneratorFlag.Implicit)] ITrayIconEvents eventHandler, bool value)
+        public void SetVisible([Implicit] ITrayEventTarget host, bool value)
         {
             if (value == visible)
             {
@@ -114,9 +119,9 @@ namespace SE.Hyperion.Desktop.Win32
                 }
             }
             else visible = false;
-            if (eventHandler != null)
+            if (host != null)
             {
-                eventHandler.OnVisibleChanged(visible);
+                host.OnVisibleChanged(visible);
             }
         }
     }

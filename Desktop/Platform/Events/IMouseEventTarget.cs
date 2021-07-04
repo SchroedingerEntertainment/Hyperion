@@ -10,48 +10,42 @@ namespace SE.Hyperion.Desktop
     /// <summary>
     /// 
     /// </summary>
-    public interface ITrayIcon
+    public interface IMouseEventTarget
     {
         /// <summary>
         /// 
         /// </summary>
-        Icon Icon
-        {
-            get;
-        }
+        /// <param name="cursor"></param>
+        void OnMouseEnter(Point cursor);
+        
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="cursor"></param>
+        void OnMouseMove(Point cursor);
 
         /// <summary>
         /// 
         /// </summary>
-        string Tooltip
-        {
-            get;
-        }
+        /// <param name="button"></param>
+        void OnMouseDown(MouseButton button);
 
         /// <summary>
         /// 
         /// </summary>
-        bool Visible
-        {
-            get;
-        }
+        /// <param name="button"></param>
+        void OnMouseUp(MouseButton button);
 
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="icon"></param>
-        void SetIcon(Icon icon);
+        /// <param name="hDelta"></param>
+        /// <param name="vDelat"></param>
+        void OnMouseWheel(float hDelta, float vDelat);
 
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="tooltip"></param>
-        void SetTooltip(string tooltip);
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="visible"></param>
-        void SetVisible(bool visible);
+        void OnMouseLeave();
     }
 }

@@ -12,7 +12,7 @@ namespace SE.Hyperion.Desktop.X11
 {
     public struct Window : IDisposable
     {
-        [Access(AccessFlag.Get)]
+        [ReadOnly]
         public IntPtr handle;
 
         public void Dispose()

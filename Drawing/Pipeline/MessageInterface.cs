@@ -54,7 +54,6 @@ namespace SE.Hyperion.Drawing
 
         protected abstract bool ProcessEvent();
 
-        [Generator(GeneratorFlag.CallBase)]
         protected virtual void OnTrayEvent(long id, TrayEvent e, Point cursor)
         {
             switch (e)

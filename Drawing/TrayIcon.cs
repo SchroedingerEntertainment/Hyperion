@@ -187,21 +187,18 @@ namespace SE.Hyperion.Drawing
             base.Dispose(disposing);
         }
 
-        [Generator(GeneratorFlag.CallBase)]
         protected virtual void OnIconChanged()
         {
             PropertyStream<Icon, ReactiveStream<PropertyId>>.Push(IconProperty.Id | this);
         }
         protected abstract void SetIcon(Icon icon);
 
-        [Generator(GeneratorFlag.CallBase)]
         protected virtual void OnTooltipChanged()
         {
             //PropertyStream<Icon>.Push(TooltipProperty.Id | this);
         }
         protected abstract void SetTooltip(string tooltip);
 
-        [Generator(GeneratorFlag.CallBase)]
         protected virtual void OnVisibleChanged(bool visible)
         {
             //PropertyStream<Icon>.Push(VisibleProperty.Id | this);

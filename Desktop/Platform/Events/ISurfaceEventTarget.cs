@@ -10,7 +10,7 @@ namespace SE.Hyperion.Desktop
     /// <summary>
     /// 
     /// </summary>
-    public interface ISurfaceEvents
+    public interface ISurfaceEventTarget
     {
         /// <summary>
         /// 
@@ -20,13 +20,24 @@ namespace SE.Hyperion.Desktop
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="point"></param>
-        void OnMove(Point point);
+        /// <param name="location"></param>
+        void OnMove(Point location);
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="size"></param>
+        void OnResize(Size size);
 
         /// <summary>
         /// 
         /// </summary>
         /// <param name="visible"></param>
         void OnVisibleChanged(bool visible);
+
+        /// <summary>
+        /// 
+        /// </summary>
+        void OnClose();
     }
 }

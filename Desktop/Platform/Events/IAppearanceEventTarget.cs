@@ -3,23 +3,31 @@
 
 using System;
 using System.Collections.Generic;
-using System.Runtime.CompilerServices;
+using System.Drawing;
 
 namespace SE.Hyperion.Desktop
 {
     /// <summary>
     /// 
     /// </summary>
-    public interface IWindowEvents
+    public interface IAppearanceEventTarget
     {
         /// <summary>
         /// 
         /// </summary>
-        void OnTitleChanged();
+        /// <param name="icon"></param>
+        void OnIconChanged(Icon icon);
 
         /// <summary>
         /// 
         /// </summary>
+        /// <param name="title"></param>
+        void OnTitleChanged(string title);
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="state"></param>
         void OnStateChanged(WindowState state);
     }
 }

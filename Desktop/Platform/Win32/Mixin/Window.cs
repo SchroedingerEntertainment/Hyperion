@@ -14,41 +14,32 @@ namespace SE.Hyperion.Desktop.Win32
     public partial struct Window : IDisposable
     {
         const Appearance StyleFlags = Appearance.Title | Appearance.Minimize | Appearance.Maximize | Appearance.Close | Appearance.Border | Appearance.Resizable | Appearance.Disabled;
-
         private readonly WndProcPtr wndProc;
         private ushort atom;
-        
-        [Access(AccessFlag.Get)]
+
+        [ReadOnly]
         public IntPtr handle;
 
-        [Access(AccessFlag.Get)]
+        [ReadOnly]
         public Rectangle bounds;
 
-        [Access(AccessFlag.Get)]
+        [ReadOnly]
         public Rectangle clientRect;
 
-        [Access(AccessFlag.Get)]
+        [ReadOnly]
         public bool sizeMove;
 
-        [Access(AccessFlag.Get)]
+        [ReadOnly]
         public bool dirty;
-        
-        [Access(AccessFlag.Get)]
+
+        public Icon icon;
         public Appearance appearance;
-
-        [Access(AccessFlag.Get)]
         public Transparency transparency;
-
-        [Access(AccessFlag.Get)]
         public WindowState state;
-
-        [Access(AccessFlag.Get)]
         public string title;
-
-        [Access(AccessFlag.Get)]
         public bool visible;
 
-        public Window([Generator(GeneratorFlag.Implicit)] IWindow host)
+        public Window([Implicit(true)] IWindow host)
         {
             this.wndProc = (hwnd, msg, wParam, lParam) => host.WndProc(host, hwnd, msg, wParam, lParam);
             this.appearance = Appearance.Taskbar | Appearance.Icon | Appearance.Title | Appearance.Border | Appearance.Resizable | Appearance.Minimize | Appearance.Maximize | Appearance.Close;
@@ -61,6 +52,7 @@ namespace SE.Hyperion.Desktop.Win32
             this.sizeMove = false;
             this.visible = false;
             this.dirty = false;
+            this.icon = null;
             this.atom = 0;
         }
         public void Dispose()
@@ -98,6 +90,12 @@ namespace SE.Hyperion.Desktop.Win32
                 cls.hCursor = Cursor.Default;
                 cls.lpszClassName = Guid.NewGuid().ToString();
 
+                if (icon != null)
+                {
+                    cls.hIcon = icon.Handle;
+                    cls.hIconSm = icon.Handle;
+                }
+
                 atom = RegisterClassEx(ref cls);
             }
             if (atom != 0)
@@ -107,11 +105,11 @@ namespace SE.Hyperion.Desktop.Win32
                 int w = ((bounds.Width <= 0) ? CW_USEDEFAULT : bounds.Width);
                 int h = ((bounds.Height <= 0) ? CW_USEDEFAULT : bounds.Height);
 
-                WindowStyles style; if ((appearance & Appearance.Title) == Appearance.Title)
+                WindowStyles style = WindowStyles.WS_POPUP; 
+                if ((appearance & Appearance.Title) == Appearance.Title)
                 {
-                    style = WindowStyles.WS_CAPTION;
+                    style |= WindowStyles.WS_CAPTION;
                 }
-                else style = WindowStyles.WS_POPUP;
                 if ((appearance & Appearance.Minimize) == Appearance.Minimize)
                 {
                     style |= WindowStyles.WS_MINIMIZEBOX;
@@ -167,6 +165,10 @@ namespace SE.Hyperion.Desktop.Win32
                 {
                     styleEx |= WindowStylesEx.WS_EX_TOPMOST;
                 }
+                if ((appearance & Appearance.Passive) == Appearance.Passive)
+                {
+                    styleEx |= WindowStylesEx.WS_EX_NOACTIVATE;
+                }
 
                 handle = CreateWindowEx(styleEx, atom, title, style, x, y, w, h, (appearance & Appearance.Taskbar) != Appearance.Taskbar ? Platform.MessageReceiver : IntPtr.Zero, IntPtr.Zero, IntPtr.Zero, IntPtr.Zero);
                 return (handle != IntPtr.Zero);
@@ -174,6 +176,7 @@ namespace SE.Hyperion.Desktop.Win32
             else return false;
         }
 
+        [ILGenerator(typeof(WndProcGenerator))]
         public IntPtr WndProc(IWindow host, IntPtr hwnd, WindowMessage msg, IntPtr wParam, IntPtr lParam)
         {
             IntPtr result;
@@ -216,17 +219,25 @@ namespace SE.Hyperion.Desktop.Win32
                         ProcessFlagsChanged((WindowLongIndexFlags)unchecked((long)wParam));
                     }
                     break;
+                case WindowMessage.WM_DPICHANGED:
+                    {
+                        ProcessDpiChanged(wParam.HiWord(), (Rect)Marshal.PtrToStructure(lParam, typeof(Rect)));
+                    }
+                    break;
                 #endregion
 
                 #region Draw
                 case WindowMessage.WM_PAINT:
                 case WindowMessage.WM_SYNCPAINT:
                     {
-                        if (!sizeMove)
+                        IRendererEventTarget eventTarget; if (!sizeMove)
                         {
                             dirty = true;
                         }
-                        else host.OnFlushBuffer();
+                        else if((eventTarget = host as IRendererEventTarget) != null)
+                        {
+                            eventTarget.OnFlushBuffer();
+                        }
                     }
                     break;
                 #endregion
@@ -234,16 +245,12 @@ namespace SE.Hyperion.Desktop.Win32
                 #region Destroy
                 case WindowMessage.WM_DESTROY:
                     {
+                        ISurfaceEventTarget eventTarget; if ((eventTarget = host as ISurfaceEventTarget) != null)
+                        {
+                            eventTarget.OnClose();
+                        }
                         PostMessage(IntPtr.Zero, msg, IntPtr.Zero, handle);
                         handle = IntPtr.Zero;
-                    }
-                    break;
-                #endregion
-
-                #region TrayIcon
-                case WindowMessage.WM_NOTIFY_EVENT:
-                    {
-                        ProcessTrayEvent(host, (WindowMessage)lParam.LoWord(), wParam);
                     }
                     break;
                 #endregion
@@ -262,7 +269,18 @@ namespace SE.Hyperion.Desktop.Win32
                 case WindowMessage.WM_SETTEXT:
                     {
                         title = GetWindowText(handle);
-                        host.OnTitleChanged();
+                        IAppearanceEventTarget eventTarget; if ((eventTarget = host as IAppearanceEventTarget) != null)
+                        {
+                            eventTarget.OnTitleChanged(title);
+                        }
+                    }
+                    break;
+                #endregion
+
+                #region Style
+                case WindowMessage.WM_SETICON:
+                    {
+                        ProcessIconChanged(host, lParam);
                     }
                     break;
                 #endregion
@@ -290,20 +308,24 @@ namespace SE.Hyperion.Desktop.Win32
                     }
                     break;
             }
-            if (state != tmp)
+            IAppearanceEventTarget eventTarget; if (state != tmp && (eventTarget = host as IAppearanceEventTarget) != null)
             {
-                host.OnStateChanged(state);
+                eventTarget.OnStateChanged(state);
             }
         }
         void ProcessWindowChange(IWindow host, IntPtr hwnd, IntPtr lParam)
         {
             CreateStruct nfo = (CreateStruct)Marshal.PtrToStructure(lParam, typeof(CreateStruct));
+            ISurfaceEventTarget eventTarget = host as ISurfaceEventTarget;
             if (handle == IntPtr.Zero)
             {
                 handle = hwnd;
 
                 SetTransparency(transparency);
-                host.OnCreated();
+                if (eventTarget != null)
+                {
+                    eventTarget.OnCreated();
+                }
             }
             bounds = new Rectangle(nfo.x, nfo.y, nfo.cx, nfo.cy);
             {
@@ -311,9 +333,15 @@ namespace SE.Hyperion.Desktop.Win32
                 {
                     clientRect = rect.ToRectangle();
                 }
-                host.OnResize(bounds.Size);
+                if (eventTarget != null)
+                {
+                    eventTarget.OnResize(bounds.Size);
+                }
             }
-            host.OnMove(bounds.Location);
+            if (eventTarget != null)
+            {
+                eventTarget.OnMove(bounds.Location);
+            }
         }
         void ProcessWindowChange(IWindow host, IntPtr lParam)
         {
@@ -329,29 +357,36 @@ namespace SE.Hyperion.Desktop.Win32
                 {
                     appearance &= ~Appearance.TopMost;
                 }
-                if (state != WindowState.Minimized)
+                ISurfaceEventTarget eventTarget;
                 {
-                    bool posChanged = (pos.x != bounds.X || pos.y != bounds.Y);
-                    bool sizeChanged = (pos.cx != bounds.Width || pos.cy != bounds.Height);
+                    bool posChanged = (pos.x != bounds.X || pos.y != bounds.Y) && ((pos.flags & SetWindowPosFlags.SWP_NOMOVE) != SetWindowPosFlags.SWP_NOMOVE);
+                    bool sizeChanged = (pos.cx != bounds.Width || pos.cy != bounds.Height) && ((pos.flags & SetWindowPosFlags.SWP_NOSIZE) != SetWindowPosFlags.SWP_NOSIZE);
 
-                    bounds = new Rectangle(pos.x, pos.y, pos.cx, pos.cy);
                     if (sizeChanged)
                     {
+                        bounds.Size = new Size(pos.cx, pos.cy);
                         Rect rect; if (GetClientRect(handle, out rect))
                         {
                             clientRect = rect.ToRectangle();
                         }
-                        host.OnResize(bounds.Size);
+                        if ((eventTarget = host as ISurfaceEventTarget) != null)
+                        {
+                            eventTarget.OnResize(bounds.Size);
+                        }
                     }
                     if (posChanged)
                     {
-                        host.OnMove(bounds.Location);
+                        bounds.Location = new System.Drawing.Point(pos.x, pos.y);
+                        if ((eventTarget = host as ISurfaceEventTarget) != null)
+                        {
+                            eventTarget.OnMove(bounds.Location);
+                        }
                     }
                 }
-                if ((pos.flags & (SetWindowPosFlags.SWP_SHOWWINDOW | SetWindowPosFlags.SWP_HIDEWINDOW)) != 0)
+                if ((pos.flags & (SetWindowPosFlags.SWP_SHOWWINDOW | SetWindowPosFlags.SWP_HIDEWINDOW)) != 0 && (eventTarget = host as ISurfaceEventTarget) != null)
                 {
                     visible = ((pos.flags & SetWindowPosFlags.SWP_SHOWWINDOW) == SetWindowPosFlags.SWP_SHOWWINDOW);
-                    host.OnVisibleChanged(visible);
+                    eventTarget.OnVisibleChanged(visible);
                 }
             }
         }
@@ -401,6 +436,11 @@ namespace SE.Hyperion.Desktop.Win32
                             appearance |= Appearance.Icon;
                         }
                         else appearance &= ~Appearance.Icon;
+                        if ((style & WindowStylesEx.WS_EX_NOACTIVATE) == WindowStylesEx.WS_EX_NOACTIVATE)
+                        {
+                            appearance |= Appearance.Passive;
+                        }
+                        else appearance &= ~Appearance.Passive;
                         if ((style & WindowStylesEx.WS_EX_APPWINDOW) == WindowStylesEx.WS_EX_APPWINDOW || GetWindowLongPtr(handle, WindowLongIndexFlags.GWLP_HWNDPARENT) == IntPtr.Zero)
                         {
                             appearance |= Appearance.Taskbar;
@@ -413,34 +453,33 @@ namespace SE.Hyperion.Desktop.Win32
                     break;
             }
         }
-        void ProcessTrayEvent(IWindow host, WindowMessage msg, IntPtr wParam)
+        void ProcessDpiChanged(int dpi, Rect rect)
         {
-            switch (msg)
+            Rectangle bounds = rect.ToRectangle();
+            SetBounds(bounds.X, bounds.Y, bounds.Width, bounds.Height);
+        }
+        void ProcessIconChanged(IWindow host, IntPtr lParam)
+        {
+            if ((icon == null && lParam != IntPtr.Zero) || (icon != null && icon.Handle != lParam))
             {
-                case WindowMessage.WM_LBUTTONUP:
-                    {
-                        if (host.OnTrayEvent(TrayEvent.Click, wParam.ToPoint()))
-                            break;
-                    }
-                    goto default;
-                case WindowMessage.WM_LBUTTONDBLCLK:
-                    {
-                        if (host.OnTrayEvent(TrayEvent.DoubleClick, wParam.ToPoint()))
-                            break;
-                    }
-                    goto default;
-                case WindowMessage.WM_RBUTTONUP:
-                    {
-                        if (host.OnTrayEvent(TrayEvent.RightClick, wParam.ToPoint()))
-                            break;
-                    }
-                    goto default;
-                default:
-                    {
-                        PostMessage(IntPtr.Zero, msg, wParam, handle);
-                    }
-                    break;
+                icon = Icon.FromHandle(lParam);
+                IAppearanceEventTarget eventTarget; if ((eventTarget = host as IAppearanceEventTarget) != null)
+                {
+                    eventTarget.OnIconChanged(icon);
+                }
             }
+        }
+
+        [MethodImpl(OptimizationExtensions.ForceInline)]
+        public void SetActive()
+        {
+            SetActiveWindow(handle);
+        }
+
+        [MethodImpl(OptimizationExtensions.ForceInline)]
+        public void SetFocus()
+        {
+            SetFocus(handle);
         }
 
         [MethodImpl(OptimizationExtensions.ForceInline)]
@@ -448,7 +487,7 @@ namespace SE.Hyperion.Desktop.Win32
         {
             if (handle != IntPtr.Zero)
             {
-                SetWindowPos(handle, IntPtr.Zero, x, y, Math.Max(0, width), Math.Max(0, height), SetWindowPosFlags.SWP_NOZORDER);
+                SetWindowPos(handle, IntPtr.Zero, x, y, Math.Max(0, width), Math.Max(0, height), SetWindowPosFlags.SWP_NOZORDER | SetWindowPosFlags.SWP_NOACTIVATE);
             }
             else bounds = new Rectangle(x, y, width, height);
         }
@@ -461,6 +500,25 @@ namespace SE.Hyperion.Desktop.Win32
                 SetWindowText(handle, value);
             }
             else title = value;
+        }
+
+        [MethodImpl(OptimizationExtensions.ForceInline)]
+        public void SetIcon(Icon value)
+        {
+            if (handle != IntPtr.Zero)
+            {
+                if (value != null)
+                {
+                    SendMessage(handle, WindowMessage.WM_SETICON, SetIconParameter.ICON_SMALL.ToHandle(), value.Handle);
+                    SendMessage(handle, WindowMessage.WM_SETICON, SetIconParameter.ICON_BIG.ToHandle(), value.Handle);
+                }
+                else
+                {
+                    SendMessage(handle, WindowMessage.WM_SETICON, SetIconParameter.ICON_SMALL.ToHandle(), IntPtr.Zero);
+                    SendMessage(handle, WindowMessage.WM_SETICON, SetIconParameter.ICON_BIG.ToHandle(), IntPtr.Zero);
+                }
+            }
+            else icon = value;
         }
 
         [MethodImpl(OptimizationExtensions.ForceInline)]
@@ -728,9 +786,32 @@ namespace SE.Hyperion.Desktop.Win32
         {
             if (handle != IntPtr.Zero)
             {
-                ShowWindow(handle, value ? ShowWindowCommand.SW_SHOW : ShowWindowCommand.SW_HIDE);
+                ShowWindowCommand com; if (value)
+                {
+                    if ((appearance & Appearance.Passive) == Appearance.Passive)
+                    {
+                        com = ShowWindowCommand.SW_SHOWNOACTIVATE;
+                    }
+                    else com = ShowWindowCommand.SW_SHOW;
+                }
+                else com = ShowWindowCommand.SW_HIDE;
+                ShowWindow(handle, com);
             }
             else visible = value;
+        }
+
+        [MethodImpl(OptimizationExtensions.ForceInline)]
+        public void SetOrder(bool top)
+        {
+            if (handle != IntPtr.Zero)
+            {
+                SetWindowPosFlags flags = SetWindowPosFlags.SWP_NOMOVE | SetWindowPosFlags.SWP_NOSIZE;
+                if ((appearance & Appearance.Passive) == Appearance.Passive)
+                {
+                    flags |= SetWindowPosFlags.SWP_NOACTIVATE;
+                }
+                SetWindowPos(handle, (top ? WindowOrder.HWND_TOP : WindowOrder.HWND_BOTTOM).ToHandle(), 0, 0, 0, 0, flags);
+            }
         }
 
         [MethodImpl(OptimizationExtensions.ForceInline)]
@@ -768,12 +849,21 @@ namespace SE.Hyperion.Desktop.Win32
         }
 
         [MethodImpl(OptimizationExtensions.ForceInline)]
-        public bool Redraw([Generator(GeneratorFlag.Implicit)] IWindow host)
+        public void Invalidate()
+        {
+            dirty = true;
+        }
+
+        [MethodImpl(OptimizationExtensions.ForceInline)]
+        public bool Redraw([Implicit(true)] IWindow host)
         {
             if (dirty)
             {
                 dirty = false;
-                host.OnFlushBuffer();
+                IRendererEventTarget eventTarget; if((eventTarget = host as IRendererEventTarget) != null)
+                {
+                    eventTarget.OnFlushBuffer();
+                }
             }
             return dirty;
         }

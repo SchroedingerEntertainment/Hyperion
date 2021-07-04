@@ -3,15 +3,23 @@
 
 using System;
 using System.Collections.Generic;
-using System.Runtime.CompilerServices;
+using System.Drawing;
 
 namespace SE.Hyperion.Desktop.Win32
 {
     /// <summary>
     /// 
     /// </summary>
-    public interface IWindow : IPlatformObject, ISurfaceEvents, IRendererEvents, IWindowEvents, ITrayIconHostEvents
+    public interface IWindow : IPlatformObject
     {
+        /// <summary>
+        /// 
+        /// </summary>
+        Rectangle Bounds
+        {
+            get;
+        }
+
         /// <summary>
         /// 
         /// </summary>

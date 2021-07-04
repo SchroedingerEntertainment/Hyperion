@@ -25,7 +25,8 @@ namespace SE.Hyperion.Desktop
         Border = 0x40,
         Resizable = 0x80,
 
-        Disabled = 0x100,
-        TopMost = 0x200,
+        Passive = 0x100,
+        Disabled = 0x200,
+        TopMost = 0x400
     }
 }

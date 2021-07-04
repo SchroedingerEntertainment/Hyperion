@@ -15,10 +15,10 @@ namespace SE.Hyperion.Desktop.Win32
         private readonly Window.WndProcPtr wndProc;
         private ushort atom;
 
-        [Access(AccessFlag.Get)]
+        [ReadOnly]
         public IntPtr handle;
 
-        public MessageWindow([Generator(GeneratorFlag.Implicit)] IPlatformObject host)
+        public MessageWindow([Implicit] IPlatformObject host)
         {
             this.wndProc = WndProc;
 
@@ -67,6 +67,11 @@ namespace SE.Hyperion.Desktop.Win32
                 case WindowMessage.WM_NOTIFY_EVENT:
                     {
                         Window.PostMessage(IntPtr.Zero, (WindowMessage)lParam.LoWord(), wParam, hwnd);
+                    }
+                    break;
+                default: if ((int)msg == Platform.WM_TBRESTART)
+                    {
+                        Window.PostMessage(IntPtr.Zero, (WindowMessage)Platform.WM_TBRESTART, IntPtr.Zero, hwnd);
                     }
                     break;
                 #endregion
