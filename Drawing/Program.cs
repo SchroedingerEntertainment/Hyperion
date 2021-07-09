@@ -32,32 +32,42 @@ namespace SE.Hyperion.Drawing
             GraphicsPath path = new GraphicsPath();
 
             Surface surface = Surface.Create();
-            Surface.SizeProperty.When(surface, (id, instance) => id.Related(instance)).Subscribe((id) =>
+            int hash = surface.GetHashCode();
+
+            IDisposable sizeChanged = null;
+            sizeChanged = Surface.SizeProperty.Where((id) => id.ObjectId == hash).Subscribe(surface, (instance, id) =>
             {
-                using (Graphics g = Graphics.FromImage(surface.Buffer.RenderTarget))
+                Surface tmp = (instance as Surface);
+                if (tmp != null)
                 {
-                    path.Reset();
-                    path.AddString("Hello World", SystemFonts.DefaultFont.FontFamily, (int)FontStyle.Regular, 32, Point.Empty, StringFormat.GenericDefault);
-                    RectangleF bounds = path.GetBounds();
+                    using (Graphics g = Graphics.FromImage(tmp.Buffer.RenderTarget))
+                    {
+                        path.Reset();
+                        path.AddString("Hello World", SystemFonts.DefaultFont.FontFamily, (int)FontStyle.Regular, 32, Point.Empty, StringFormat.GenericDefault);
+                        RectangleF bounds = path.GetBounds();
 
-                    g.SetClip(clip);
-                    g.Clear(Color.Transparent);
-                    g.ResetClip();
+                        g.SetClip(clip);
+                        g.Clear(Color.Transparent);
+                        g.ResetClip();
 
-                    clip = RectangleF.Union(Rectangle.Empty, bounds);
-                    clip.Offset((surface.ClientRect.Width - clip.Width) / 2, (surface.ClientRect.Height - clip.Height) / 2);
-                    clip.Inflate(2, 2);
+                        clip = RectangleF.Union(Rectangle.Empty, bounds);
+                        clip.Offset((tmp.ClientRect.Width - clip.Width) / 2, (tmp.ClientRect.Height - clip.Height) / 2);
+                        clip.Inflate(2, 2);
 
-                    g.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
-                    g.TranslateTransform(clip.X, clip.Y);
-                    g.FillPath(Brushes.Black, path);
+                        g.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
+                        g.TranslateTransform(clip.X, clip.Y);
+                        g.FillPath(Brushes.Black, path);
 
-                    surface.Invalidate();
+                        tmp.Invalidate();
+                    }
                 }
+                else sizeChanged.Dispose();
 
             });
-            Surface.CloseEvent.When(surface, (e, instance) => e.Related(instance)).Subscribe((e) =>
+            IDisposable closeEvent = null;
+            closeEvent = Surface.CloseEvent.Where((id) => id.Sender == hash).Subscribe(surface, (instance, e) =>
             {
+                closeEvent.Dispose();
                 close = true;
 
             });

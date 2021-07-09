@@ -123,7 +123,7 @@ namespace SE.Hyperion.Drawing
             set { IconProperty.Set(this, value); }
         }
 
-        bool tooltipFlag;
+        //bool tooltipFlag;
         /// <summary>
         /// 
         /// </summary>
@@ -135,7 +135,7 @@ namespace SE.Hyperion.Drawing
             set { SetTooltip(value); }
         }
 
-        bool visibleFlag;
+        //bool visibleFlag;
         /// <summary>
         /// 
         /// </summary>

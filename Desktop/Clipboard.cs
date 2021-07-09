@@ -10,7 +10,7 @@ namespace SE.Hyperion.Desktop
 {
     public class Clipboard
     {
-        private static IClipboard instance;
+        //private static IClipboard instance;
 
         /*static Clipboard()
         {
@@ -29,7 +29,8 @@ namespace SE.Hyperion.Desktop
         [MethodImpl(OptimizationExtensions.ForceInline)]
         public static bool Clear()
         {
-            return instance.Clear();
+            throw new NotImplementedException();
+            //return instance.Clear();
         }
     }
 }
