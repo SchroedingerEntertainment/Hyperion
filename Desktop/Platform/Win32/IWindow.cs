@@ -10,7 +10,7 @@ namespace SE.Hyperion.Desktop.Win32
     /// <summary>
     /// 
     /// </summary>
-    public interface IWindow : IPlatformObject
+    public interface IWindow : INative
     {
         /// <summary>
         /// 

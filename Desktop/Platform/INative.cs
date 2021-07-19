@@ -9,7 +9,7 @@ namespace SE.Hyperion.Desktop
     /// <summary>
     /// 
     /// </summary>
-    public interface IPlatformObject
+    public interface INative
     {
         /// <summary>
         /// 

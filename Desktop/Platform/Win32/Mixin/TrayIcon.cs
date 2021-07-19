@@ -16,18 +16,13 @@ namespace SE.Hyperion.Desktop.Win32
         [ReadOnly]
         public IntPtr handle;
 
-        [ReadOnly]
         public Icon icon;
-
-        [ReadOnly]
         public string tooltip;
-
-        [ReadOnly]
         public bool visible;
 
-        public TrayIcon([Implicit] IPlatformObject host)
+        public TrayIcon([Implicit] ITrayContext host)
         {
-            this.handle = (host != null) ? host.Handle : Platform.MessageReceiver;
+            this.handle = ((host != null) ? host.Handle : MessageWindow.Default.Handle);
             this.tooltip = string.Empty;
             this.guid = Guid.NewGuid();
             this.visible = false;
@@ -40,6 +35,18 @@ namespace SE.Hyperion.Desktop.Win32
                 SetVisible(null, false);
                 handle = IntPtr.Zero;
             }
+        }
+
+        [MethodImpl(OptimizationExtensions.ForceInline)]
+        public void SetOwner(ITrayContext owner)
+        {
+            bool vi = visible;
+            if (handle != IntPtr.Zero)
+            {
+                SetVisible(null, false);
+            }
+            handle = ((owner != null) ? owner.Handle : MessageWindow.Default.Handle);
+            SetVisible(null, vi);
         }
 
         [MethodImpl(OptimizationExtensions.ForceInline)]
@@ -84,7 +91,6 @@ namespace SE.Hyperion.Desktop.Win32
             }
         }
 
-        [MethodImpl(OptimizationExtensions.ForceInline)]
         public void SetVisible([Implicit] ITrayEventTarget host, bool value)
         {
             if (value == visible)

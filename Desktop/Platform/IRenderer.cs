@@ -10,7 +10,7 @@ namespace SE.Hyperion.Desktop
     /// <summary>
     /// 
     /// </summary>
-    public interface IRenderer : IPlatformObject
+    public interface IRenderer : INative
     {
         /// <summary>
         /// 

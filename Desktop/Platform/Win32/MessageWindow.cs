@@ -6,21 +6,35 @@ using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using SE.Mixin;
 
-[assembly: InternalsVisibleTo("Mixin")]
-
 namespace SE.Hyperion.Desktop.Win32
 {
-    internal struct MessageWindow : IDisposable
+    public struct MessageWindow : INative, IDisposable
     {
+        public readonly static INative Default;
+
         private readonly Window.WndProcPtr wndProc;
         private ushort atom;
 
         [ReadOnly]
         public IntPtr handle;
 
-        public MessageWindow([Implicit] IPlatformObject host)
+        public IntPtr Handle
         {
-            this.wndProc = WndProc;
+            [MethodImpl(OptimizationExtensions.ForceInline)]
+            get { return handle; }
+        }
+
+        static MessageWindow()
+        {
+            Default = new MessageWindow(null);
+        }
+        public MessageWindow([Implicit(true)] IWindow host)
+        {
+            if (host != null)
+            {
+                wndProc = (hwnd, msg, wParam, lParam) => host.WndProc(host, hwnd, msg, wParam, lParam);
+            }
+            else wndProc = (hwnd, msg, wParam, lParam) => WndProc(null, hwnd, msg, wParam, lParam);
 
             WindowClassEx cls = WindowClassEx.Create();
             cls.lpszClassName = Guid.NewGuid().ToString();
@@ -51,7 +65,8 @@ namespace SE.Hyperion.Desktop.Win32
             }
         }
 
-        private static IntPtr WndProc(IntPtr hwnd, WindowMessage msg, IntPtr wParam, IntPtr lParam)
+        [ILGenerator(typeof(WndProcGenerator))]
+        public static IntPtr WndProc(IWindow host, IntPtr hwnd, WindowMessage msg, IntPtr wParam, IntPtr lParam)
         {
             switch (msg)
             {

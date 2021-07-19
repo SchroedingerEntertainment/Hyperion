@@ -14,16 +14,6 @@ namespace SE.Hyperion.Desktop.Win32
         public readonly static Version OsVersion;
         public readonly static int WM_TBRESTART;
 
-        private readonly static MessageWindow messageReceiver;
-        /// <summary>
-        /// 
-        /// </summary>
-        public static IntPtr MessageReceiver
-        {
-            [MethodImpl(OptimizationExtensions.ForceInline)]
-            get { return messageReceiver.handle; }
-        }
-
         static Platform()
         {
             OsVersionInfoEx osverinfo = OsVersionInfoEx.Create();
@@ -32,8 +22,6 @@ namespace SE.Hyperion.Desktop.Win32
                 OsVersion = new Version(osverinfo.dwMajorVersion, osverinfo.dwMinorVersion, osverinfo.dwBuildNumber);
             }
             else OsVersion = new Version();
-            messageReceiver = new MessageWindow(null);
-
             WM_TBRESTART = Window.RegisterWindowMessage("TaskbarCreated");
         }
 
@@ -44,7 +32,7 @@ namespace SE.Hyperion.Desktop.Win32
             return new ExternalException(System.Runtime.Platform.GetWin32ErrorMessage(errorCode), errorCode);
         }
 
-        public static bool ProcessEvent([Implicit(true)] IPlatform host)
+        public static bool ProcessEvent([Implicit] ITrayActionEventTarget host)
         {
             Message msg = new Message();
             if (Window.PeekMessage(ref msg, IntPtr.Zero, 0, 0, 1))
@@ -56,23 +44,23 @@ namespace SE.Hyperion.Desktop.Win32
                         #region TrayIcon
                         case WindowMessage.WM_LBUTTONUP:
                             {
-                                host.OnTrayEvent(unchecked((long)msg.lParam), TrayEvent.Click, msg.wParam.ToPoint());
+                                host.OnMouse(unchecked((long)msg.lParam), MouseButton.Left, msg.wParam.ToPoint());
                             }
                             break;
                         case WindowMessage.WM_LBUTTONDBLCLK:
                             {
-                                host.OnTrayEvent(unchecked((long)msg.lParam), TrayEvent.DoubleClick, msg.wParam.ToPoint());
+                                host.OnMouse(unchecked((long)msg.lParam), MouseButton.Double, msg.wParam.ToPoint());
                             }
                             break;
                         case WindowMessage.WM_CONTEXTMENU:
                         case WindowMessage.WM_RBUTTONUP:
                             {
-                                host.OnTrayEvent(unchecked((long)msg.lParam), TrayEvent.RightClick, msg.wParam.ToPoint());
+                                host.OnMouse(unchecked((long)msg.lParam), MouseButton.Right, msg.wParam.ToPoint());
                             }
                             break;
                         default: if ((int)msg.message == Platform.WM_TBRESTART)
                             {
-                                host.OnTrayEvent(unchecked((long)msg.lParam), TrayEvent.Redraw, System.Drawing.Point.Empty);
+                                host.OnRefresh(unchecked((long)msg.lParam));
                             }
                             break;
                         #endregion

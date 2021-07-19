@@ -170,7 +170,7 @@ namespace SE.Hyperion.Desktop.Win32
                     styleEx |= WindowStylesEx.WS_EX_NOACTIVATE;
                 }
 
-                handle = CreateWindowEx(styleEx, atom, title, style, x, y, w, h, (appearance & Appearance.Taskbar) != Appearance.Taskbar ? Platform.MessageReceiver : IntPtr.Zero, IntPtr.Zero, IntPtr.Zero, IntPtr.Zero);
+                handle = CreateWindowEx(styleEx, atom, title, style, x, y, w, h, (appearance & Appearance.Taskbar) != Appearance.Taskbar ? MessageWindow.Default.Handle : IntPtr.Zero, IntPtr.Zero, IntPtr.Zero, IntPtr.Zero);
                 return (handle != IntPtr.Zero);
             }
             else return false;
@@ -606,7 +606,7 @@ namespace SE.Hyperion.Desktop.Win32
                     }
                     else
                     {
-                        SetWindowLongPtr(handle, WindowLongIndexFlags.GWLP_HWNDPARENT, Platform.MessageReceiver);
+                        SetWindowLongPtr(handle, WindowLongIndexFlags.GWLP_HWNDPARENT, MessageWindow.Default.Handle);
                         style &= ~WindowStylesEx.WS_EX_APPWINDOW;
                     }
                     SetWindowLong(handle, WindowLongIndexFlags.GWL_EXSTYLE, (int)style);
@@ -758,7 +758,7 @@ namespace SE.Hyperion.Desktop.Win32
         {
             if (handle != IntPtr.Zero)
             {
-                ShowWindowCommand cmd; switch (state)
+                ShowWindowCommand cmd; switch (value)
                 {
                     case WindowState.Minimized:
                         {

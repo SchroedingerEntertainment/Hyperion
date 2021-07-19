@@ -40,5 +40,10 @@ namespace SE.Hyperion.Desktop
         /// The second XButton (XBUTTON2) on Microsoft IntelliMouse Explorer
         /// </summary>
         XButton2 = 5,
+
+        /// <summary>
+        /// A double click
+        /// </summary>
+        Double = 0xFF
     }
 }

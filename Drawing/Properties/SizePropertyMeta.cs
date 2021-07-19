@@ -43,7 +43,7 @@ namespace SE.Hyperion.Drawing
         [MethodImpl(OptimizationExtensions.ForceInline)]
         public bool Set(object instance, Size value)
         {
-            Surface tmp; if ((tmp = instance as Surface) == null)
+            Surface tmp; if ((tmp = instance as Surface) != null)
             {
                 tmp.Size = value;
                 return true;
@@ -54,7 +54,7 @@ namespace SE.Hyperion.Drawing
         [MethodImpl(OptimizationExtensions.ForceInline)]
         public bool TryGet(object instance, out Size value)
         {
-            Surface tmp; if ((tmp = instance as Surface) == null)
+            Surface tmp; if ((tmp = instance as Surface) != null)
             {
                 value = tmp.Size;
                 return true;
@@ -65,7 +65,7 @@ namespace SE.Hyperion.Drawing
         [MethodImpl(OptimizationExtensions.ForceInline)]
         public bool Clear(object instance)
         {
-            Surface tmp; if ((tmp = instance as Surface) == null)
+            Surface tmp; if ((tmp = instance as Surface) != null)
             {
                 tmp.Size = Default;
                 return true;

@@ -10,6 +10,6 @@ namespace SE.Hyperion.Desktop.Win32
     /// <summary>
     /// 
     /// </summary>
-    public interface IPopupWindow : IPlatformObject
+    public interface IPopupWindow : INative
     { }
 }

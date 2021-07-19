@@ -29,13 +29,5 @@ namespace SE.Hyperion.Desktop
         /// </summary>
         /// <param name="visible"></param>
         void OnVisibleChanged(bool visible);
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="event"></param>
-        /// <param name="cursor"></param>
-        /// <returns></returns>
-        bool OnTrayEvent(TrayEvent @event, Point cursor);
     }
 }

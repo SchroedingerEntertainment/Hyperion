@@ -24,9 +24,10 @@ namespace SE.Hyperion.Drawing
 
             Icon ico = Icon.FromHandle(bmp.GetHicon());
 
-            /*TrayIcon icon = TrayIcon.Create();
+            TrayIcon icon = TrayIcon.Create();
             icon.Icon = ico;
-            icon.Visible = true;*/
+            icon.Tooltip = "Hello World";
+            icon.Visible = true;
             
             RectangleF clip = RectangleF.Empty;
             GraphicsPath path = new GraphicsPath();
@@ -78,23 +79,31 @@ namespace SE.Hyperion.Drawing
             surface.Visible = true;
             surface.Initialize();
             
-            /*long iconId = icon.Id;
-            WeakReference<Surface> ic = new WeakReference<Surface>(surface, false);
-            IDisposable dp = TrayIcon.RightClickEvent.Where((e) => e.Sender == iconId).Subscribe((e) =>
+            long iconId = icon.Id;
+            IDisposable mouseEvent = null;
+            mouseEvent = TrayIcon.MouseEvent.Where((e) => e.Sender == iconId).Subscribe(surface, (instance, e) =>
             {
-                Point origin = TrayIcon.RightClickEvent.GetData(ref e);
-                surface.SetBounds(origin.X, origin.Y - 300, 100, 300);
-                surface.Visible = true;
-                surface.SetOrder(true);
-                
-            });*/
-
+                switch(TrayIcon.MouseEvent.GetData(ref e).Button)
+                {
+                    case Desktop.MouseButton.Double:
+                        {
+                            Surface tmp = (instance as Surface);
+                            if (tmp != null)
+                            {
+                                tmp.Visible = true;
+                                tmp.State = Desktop.WindowState.Normal;
+                            }
+                            else mouseEvent.Dispose();
+                        }
+                        break;
+                }
+            });
             Stopwatch sw = Stopwatch.StartNew();
             sw.Start();
 
             while (!close)
             {
-                while (MessageInterface.GetNext())
+                while (SurfaceManager.ProcessEvent())
                     ;
                 if (surface.Handle != IntPtr.Zero)
                 {
@@ -107,7 +116,7 @@ namespace SE.Hyperion.Drawing
             }
 
             surface.Dispose();
-            //icon.Dispose();
+            icon.Dispose();
         }
     }
 }

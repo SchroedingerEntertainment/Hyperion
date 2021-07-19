@@ -8,146 +8,39 @@ using System.Runtime;
 using System.Runtime.CompilerServices;
 using SE.Hyperion.Desktop;
 using SE.Mixin;
-using SE.Reactive;
-
-using Notifier = SE.Reactive.ReactiveNotifier<System.Drawing.Point, SE.Reactive.ReactiveStream<SE.Reactive.NotifyArgs>>;
 
 namespace SE.Hyperion.Drawing
 {
-    public abstract class TrayIcon : FinalizerObject
+    public abstract partial class TrayIcon : FinalizerObject
     {
-        internal struct IconPropertyMeta : IReactiveProperty<Icon>
-        {
-            private readonly PropertyId id;
-            public PropertyId Id
-            {
-                [MethodImpl(OptimizationExtensions.ForceInline)]
-                get { return id.Property; }
-            }
-            public Icon Default
-            {
-                [MethodImpl(OptimizationExtensions.ForceInline)]
-                get { return default(Icon); }
-            }
-
-            public IconPropertyMeta(UInt32 id)
-            {
-                this.id = new PropertyId(id);
-            }
-            
-            [MethodImpl(OptimizationExtensions.ForceInline)]
-            public bool Set(object instance, Icon value)
-            {
-                TrayIcon inst = (instance as TrayIcon);
-                lock (inst)
-                {
-                    bool result = inst.iconFlag;
-                    inst.iconFlag = true;
-                    inst.SetIcon(value);
-
-                    return result;
-                }
-            }
-
-            [MethodImpl(OptimizationExtensions.ForceInline)]
-            public bool TryGet(object instance, out Icon value)
-            {
-                TrayIcon inst = (instance as TrayIcon);
-                lock (inst)
-                {
-                    if (inst.iconFlag)
-                    {
-                        value = inst.Icon;
-                        return true;
-                    }
-                    else
-                    {
-                        value = Default;
-                        return false;
-                    }
-                }
-            }
-
-            [MethodImpl(OptimizationExtensions.ForceInline)]
-            public bool Clear(object instance)
-            {
-                TrayIcon inst = (instance as TrayIcon);
-                lock (inst)
-                {
-                    bool result = inst.iconFlag;
-                    inst.iconFlag = false;
-                    inst.SetIcon(Default);
-
-                    return result;
-                }
-            }
-
-            [MethodImpl(OptimizationExtensions.ForceInline)]
-            public IDisposable Subscribe(IObserver<PropertyId> observer)
-            {
-                return PropertyStream<Icon, ReactiveStream<PropertyId>>.Subscribe(id, observer);
-            }
-        }
-
-        public readonly static IReactiveProperty<Icon> IconProperty;
-
-        public readonly static IReactiveNotifier<Point> ClickEvent;
-        public readonly static IReactiveNotifier<Point> DoubleClickEvent;
-        public readonly static IReactiveNotifier<Point> RightClickEvent;
-
-        IPlatformObject owner;
-
         public abstract IntPtr Handle
         {
             get;
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
         public int Id
         {
             [MethodImpl(OptimizationExtensions.ForceInline)]
             get { return unchecked((long)Handle).GetHashCode(); }
         }
 
-        bool iconFlag;
-        /// <summary>
-        /// 
-        /// </summary>
-        public virtual Icon Icon
+        public abstract Icon Icon
         {
-            [MethodImpl(OptimizationExtensions.ForceInline)]
-            get { throw new NotImplementedException(); }
-            [MethodImpl(OptimizationExtensions.ForceInline)]
-            set { IconProperty.Set(this, value); }
+            get;
+            set;
+        }
+        public abstract string Tooltip
+        {
+            get;
+            set;
+        }
+        public abstract bool Visible
+        {
+            get;
+            set;
         }
 
-        //bool tooltipFlag;
-        /// <summary>
-        /// 
-        /// </summary>
-        public virtual string Tooltip
-        {
-            [MethodImpl(OptimizationExtensions.ForceInline)]
-            get { throw new NotImplementedException(); }
-            [MethodImpl(OptimizationExtensions.ForceInline)]
-            set { SetTooltip(value); }
-        }
-
-        //bool visibleFlag;
-        /// <summary>
-        /// 
-        /// </summary>
-        public virtual bool Visible
-        {
-            [MethodImpl(OptimizationExtensions.ForceInline)]
-            get { throw new NotImplementedException(); }
-            [MethodImpl(OptimizationExtensions.ForceInline)]
-            set { SetVisible(value); }
-        }
-
-        static TrayIcon()
+        private static void CreateType()
         {
             #if DEBUG
             try
@@ -156,7 +49,11 @@ namespace SE.Hyperion.Drawing
                 if ((Application.Platform & PlatformName.Windows) == PlatformName.Windows)
                 {
                     //TODO - Chekc if X11 can be used on Windows (using VcXsrv) as well and provide an option to do so
-                    Compositor.DeclareType<TrayIcon>(typeof(Desktop.Win32.TrayIcon));
+                    Compositor.DeclareType<TrayIcon>
+                    (
+                        typeof(Desktop.Win32.TrayIcon),
+                        typeof(TrayListener)
+                    );
                 }
                 else Compositor.DeclareType<TrayIcon>(typeof(Desktop.X11.TrayIcon));
             #if DEBUG
@@ -166,44 +63,29 @@ namespace SE.Hyperion.Drawing
                 throw er;
             }
             #endif
-            IconProperty = new IconPropertyMeta((UInt32)UniqueId.Next32());
-            ClickEvent = new Notifier((UInt32)UniqueId.Next32());
-            DoubleClickEvent = new Notifier((UInt32)UniqueId.Next32());
-            RightClickEvent = new Notifier((UInt32)UniqueId.Next32());
         }
         /// <summary>
         /// 
         /// </summary>
-        public TrayIcon(IPlatformObject owner)
-        {
-            this.owner = owner;
-        }
+        public TrayIcon()
+        { }
         protected override void Dispose(bool disposing)
         {
-            if (!Disposed)
+            if(!Disposed)
             {
-                OnVisibleChanged(false);
+                ITrayEventTarget tt; if ((tt = this as ITrayEventTarget) != null)
+                {
+                    tt.OnVisibleChanged(false);
+                }
             }
             base.Dispose(disposing);
         }
 
-        protected virtual void OnIconChanged()
-        {
-            PropertyStream<Icon, ReactiveStream<PropertyId>>.Push(IconProperty.Id | this);
-        }
-        protected abstract void SetIcon(Icon icon);
-
-        protected virtual void OnTooltipChanged()
-        {
-            //PropertyStream<Icon>.Push(TooltipProperty.Id | this);
-        }
-        protected abstract void SetTooltip(string tooltip);
-
-        protected virtual void OnVisibleChanged(bool visible)
-        {
-            //PropertyStream<Icon>.Push(VisibleProperty.Id | this);
-        }
-        protected abstract void SetVisible(bool visible);
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="context"></param>
+        public abstract void SetOwner(ITrayContext context);
 
         /// <summary>
         /// 
@@ -212,17 +94,20 @@ namespace SE.Hyperion.Drawing
         [MethodImpl(OptimizationExtensions.ForceInline)]
         public static TrayIcon Create()
         {
-            return Compositor.CreateInstance<TrayIcon>(new object[1]);
+            return Compositor.CreateInstance<TrayIcon>();
         }
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="owner"></param>
+        /// <param name="context"></param>
         /// <returns></returns>
         [MethodImpl(OptimizationExtensions.ForceInline)]
-        public static TrayIcon Create(IPlatformObject owner)
+        public static TrayIcon Create(ITrayContext context)
         {
-            return Compositor.CreateInstance<TrayIcon>(owner);
+            TrayIcon icon = Compositor.CreateInstance<TrayIcon>();
+            icon.SetOwner(context);
+
+            return icon;
         }
     }
 }

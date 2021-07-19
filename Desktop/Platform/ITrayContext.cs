@@ -9,13 +9,6 @@ namespace SE.Hyperion.Desktop
     /// <summary>
     /// 
     /// </summary>
-    public enum TrayEvent : byte
-    {
-        Click = 0,
-        DoubleClick,
-
-        RightClick,
-
-        Redraw,
-    }
+    public interface ITrayContext : INative, ITrayActionEventTarget
+    { }
 }

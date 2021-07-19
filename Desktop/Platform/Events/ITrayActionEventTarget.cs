@@ -10,14 +10,20 @@ namespace SE.Hyperion.Desktop
     /// <summary>
     /// 
     /// </summary>
-    public interface IPlatform
+    public interface ITrayActionEventTarget
     {
         /// <summary>
         /// 
         /// </summary>
         /// <param name="id"></param>
-        /// <param name="e"></param>
+        /// <param name="button"></param>
         /// <param name="cursor"></param>
-        void OnTrayEvent(Int64 id, TrayEvent e, Point cursor);
+        bool OnMouse(Int64 id, MouseButton button, Point cursor);
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="id"></param>
+        bool OnRefresh(Int64 id);
     }
 }

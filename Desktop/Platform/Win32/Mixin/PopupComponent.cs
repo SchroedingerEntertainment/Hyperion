@@ -21,7 +21,7 @@ namespace SE.Hyperion.Desktop.Win32
             HeaderSize = Marshal.SizeOf(typeof(RawInputHeader));
             InputSize = Marshal.SizeOf(typeof(RawInput));
         }
-        public PopupComponent([Implicit(true)] IPlatformObject host)
+        public PopupComponent([Implicit(true)] INative host)
         {
             this.winEventProc = (hWinEventHook, @event, hwnd, idObject, idChild, dwEventThread, dwmsEventTime) => Window.PostMessage(host.Handle, WindowMessage.WM_UNINITMENUPOPUP, IntPtr.Zero, IntPtr.Zero);
             this.eventHook = IntPtr.Zero;

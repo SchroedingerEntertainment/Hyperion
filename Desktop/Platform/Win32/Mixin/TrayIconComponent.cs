@@ -34,32 +34,32 @@ namespace SE.Hyperion.Desktop.Win32
             {
                 case WindowMessage.WM_LBUTTONUP:
                     {
-                        ITrayEventTarget eventTarget; if ((eventTarget = host as ITrayEventTarget) != null && eventTarget.OnTrayEvent(TrayEvent.Click, wParam.ToPoint()))
+                        ITrayContext eventTarget; if ((eventTarget = host as ITrayContext) == null || !eventTarget.OnMouse(unchecked((long)host.Handle), MouseButton.Left, wParam.ToPoint()))
                         {
-                            break;
+                            Window.PostMessage(IntPtr.Zero, msg, wParam, host.Handle);
                         }
                     }
-                    goto default;
+                    break;
                 case WindowMessage.WM_LBUTTONDBLCLK:
                     {
-                        ITrayEventTarget eventTarget; if ((eventTarget = host as ITrayEventTarget) != null && eventTarget.OnTrayEvent(TrayEvent.DoubleClick, wParam.ToPoint()))
+                        ITrayContext eventTarget; if ((eventTarget = host as ITrayContext) == null || !eventTarget.OnMouse(unchecked((long)host.Handle), MouseButton.Double, wParam.ToPoint()))
                         {
-                            break;
+                            Window.PostMessage(IntPtr.Zero, msg, wParam, host.Handle);
                         }
                     }
-                    goto default;
+                    break;
                 case WindowMessage.WM_CONTEXTMENU:
                 case WindowMessage.WM_RBUTTONUP:
                     {
-                        ITrayEventTarget eventTarget; if ((eventTarget = host as ITrayEventTarget) != null && eventTarget.OnTrayEvent(TrayEvent.RightClick, wParam.ToPoint()))
+                        ITrayContext eventTarget; if ((eventTarget = host as ITrayContext) == null || !eventTarget.OnMouse(unchecked((long)host.Handle), MouseButton.Right, wParam.ToPoint()))
                         {
-                            break;
+                            Window.PostMessage(IntPtr.Zero, msg, wParam, host.Handle);
                         }
                     }
-                    goto default;
+                    break;
                 default:
                     {
-                        ITrayEventTarget eventTarget; if ((int)msg != Platform.WM_TBRESTART && (eventTarget = host as ITrayEventTarget) != null && eventTarget.OnTrayEvent(TrayEvent.Redraw, System.Drawing.Point.Empty))
+                        ITrayContext eventTarget; if ((int)msg == Platform.WM_TBRESTART && ((eventTarget = host as ITrayContext) == null || !eventTarget.OnRefresh(unchecked((long)host.Handle))))
                         {
                             Window.PostMessage(IntPtr.Zero, msg, wParam, host.Handle);
                         }

@@ -3,7 +3,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Drawing;
 using System.Runtime.CompilerServices;
 using SE.Reactive;
 
@@ -12,12 +11,12 @@ namespace SE.Hyperion.Drawing
     /// <summary>
     /// 
     /// </summary>
-    public class LocationPropertyMeta : IReactiveProperty<Point>
+    public class TooltipPropertyMeta : IReactiveProperty<string>
     {
         /// <summary>
         /// 
         /// </summary>
-        public readonly static IReactiveProperty<Point> Instance;
+        public readonly static IReactiveProperty<string> Instance;
 
         private readonly PropertyId id;
         public PropertyId Id
@@ -25,58 +24,58 @@ namespace SE.Hyperion.Drawing
             [MethodImpl(OptimizationExtensions.ForceInline)]
             get { return id.Property; }
         }
-        public Point Default
+        public string Default
         {
             [MethodImpl(OptimizationExtensions.ForceInline)]
-            get { return Point.Empty; }
+            get { return string.Empty; }
         }
 
-        static LocationPropertyMeta()
+        static TooltipPropertyMeta()
         {
-            Instance = new LocationPropertyMeta();
+            Instance = new TooltipPropertyMeta();
         }
-        private LocationPropertyMeta()
+        private TooltipPropertyMeta()
         {
             this.id = new PropertyId((UInt32)UniqueId.Next32());
         }
             
         [MethodImpl(OptimizationExtensions.ForceInline)]
-        public bool Set(object instance, Point value)
+        public bool Set(object instance, string value)
         {
-            Surface tmp; if ((tmp = instance as Surface) != null)
+            TrayIcon ti; if ((ti = instance as TrayIcon) != null)
             {
-                tmp.Location = value;
+                ti.Tooltip = value;
                 return true;
             }
-            else return PropertyStream<Point, ReactiveStream<PropertyId>>.Set(instance, id, ref value);
+            else return PropertyStream<string, ReactiveStream<PropertyId>>.Set(instance, id, ref value);
         }
 
         [MethodImpl(OptimizationExtensions.ForceInline)]
-        public bool TryGet(object instance, out Point value)
+        public bool TryGet(object instance, out string value)
         {
-            Surface tmp; if ((tmp = instance as Surface) != null)
+            TrayIcon ti; if ((ti = instance as TrayIcon) != null)
             {
-                value = tmp.Location;
+                value = ti.Tooltip;
                 return true;
             }
-            else return PropertyStream<Point, ReactiveStream<PropertyId>>.TryGet(instance, id, out value);
+            else return PropertyStream<string, ReactiveStream<PropertyId>>.TryGet(instance, id, out value);
         }
 
         [MethodImpl(OptimizationExtensions.ForceInline)]
         public bool Clear(object instance)
         {
-            Surface tmp; if ((tmp = instance as Surface) != null)
+            TrayIcon ti; if ((ti = instance as TrayIcon) != null)
             {
-                tmp.Location = Default;
+                ti.Tooltip = Default;
                 return true;
             }
-            else return PropertyStream<Point, ReactiveStream<PropertyId>>.Clear(instance, id);
+            else return PropertyStream<string, ReactiveStream<PropertyId>>.Clear(instance, id);
         }
 
         [MethodImpl(OptimizationExtensions.ForceInline)]
         public IDisposable Subscribe(IObserver<PropertyId> observer)
         {
-            return PropertyStream<Point, ReactiveStream<PropertyId>>.Subscribe(id, observer);
+            return PropertyStream<string, ReactiveStream<PropertyId>>.Subscribe(id, observer);
         }
     }
 }

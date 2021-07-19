@@ -4,12 +4,11 @@
 using System;
 using System.Collections.Generic;
 using System.Drawing;
-using System.Runtime.CompilerServices;
 using SE.Reactive;
 
 namespace SE.Hyperion.Drawing
 {
-    public partial class Surface
+    public partial class TrayIcon
     {
         /// <summary>
         /// 
@@ -19,13 +18,11 @@ namespace SE.Hyperion.Drawing
         /// <summary>
         /// 
         /// </summary>
-        public readonly static IReactiveProperty<Point> LocationProperty;
-        
+        public readonly static IReactiveProperty<Icon> IconProperty;
         /// <summary>
         /// 
         /// </summary>
-        public readonly static IReactiveProperty<Size> SizeProperty;
-
+        public readonly static IReactiveProperty<string> TooltipProperty;
         /// <summary>
         /// 
         /// </summary>
@@ -34,23 +31,22 @@ namespace SE.Hyperion.Drawing
         /// <summary>
         /// 
         /// </summary>
-        public readonly static IReactiveNotifier CreateEvent;
-
+        public readonly static IReactiveNotifier<MouseEventArgs> MouseEvent;
         /// <summary>
         /// 
         /// </summary>
-        public readonly static IReactiveNotifier CloseEvent;
+        public readonly static IReactiveNotifier RefreshEvent;
 
-        static Surface()
+        static TrayIcon()
         {
             HandleProperty = new HandlePropertyMeta((UInt32)UniqueId.Next32());
-            LocationProperty = LocationPropertyMeta.Instance;
-            SizeProperty = SizePropertyMeta.Instance;
 
+            IconProperty = IconPropertyMeta.Instance;
+            TooltipProperty = TooltipPropertyMeta.Instance;
             VisibleProperty = VisiblePropertyMeta.Instance;
 
-            CreateEvent = new ReactiveNotifier<ReactiveStream<NotifyArgs>>((UInt32)UniqueId.Next32());
-            CloseEvent = new ReactiveNotifier<ReactiveStream<NotifyArgs>>((UInt32)UniqueId.Next32());
+            MouseEvent = new ReactiveNotifier<MouseEventArgs, ReactiveStream<NotifyArgs>>((UInt32)UniqueId.Next32());
+            RefreshEvent = new ReactiveNotifier<ReactiveStream<NotifyArgs>>((UInt32)UniqueId.Next32());
 
             CreateType();
         }

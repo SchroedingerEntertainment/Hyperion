@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Runtime.CompilerServices;
 using SE.Reactive;
 
@@ -11,12 +12,12 @@ namespace SE.Hyperion.Drawing
     /// <summary>
     /// 
     /// </summary>
-    public class VisiblePropertyMeta : IReactiveProperty<bool>
+    public class IconPropertyMeta : IReactiveProperty<Icon>
     {
         /// <summary>
         /// 
         /// </summary>
-        public readonly static IReactiveProperty<bool> Instance;
+        public readonly static IReactiveProperty<Icon> Instance;
 
         private readonly PropertyId id;
         public PropertyId Id
@@ -24,56 +25,56 @@ namespace SE.Hyperion.Drawing
             [MethodImpl(OptimizationExtensions.ForceInline)]
             get { return id.Property; }
         }
-        public bool Default
+        public Icon Default
         {
             [MethodImpl(OptimizationExtensions.ForceInline)]
-            get { return default(bool); }
+            get { return default(Icon); }
         }
 
-        static VisiblePropertyMeta()
+        static IconPropertyMeta()
         {
-            Instance = new VisiblePropertyMeta();
+            Instance = new IconPropertyMeta();
         }
-        private VisiblePropertyMeta()
+        private IconPropertyMeta()
         {
             this.id = new PropertyId((UInt32)UniqueId.Next32());
         }
             
         [MethodImpl(OptimizationExtensions.ForceInline)]
-        public bool Set(object instance, bool value)
+        public bool Set(object instance, Icon value)
         {
             Surface sf; if ((sf = instance as Surface) != null)
             {
-                sf.Visible = value;
+                sf.Icon = value;
                 return true;
             }
             else
             {
                 TrayIcon ti; if ((ti = instance as TrayIcon) != null)
                 {
-                    ti.Visible = value;
+                    ti.Icon = value;
                     return true;
                 }
-                else return PropertyStream<bool, ReactiveStream<PropertyId>>.Set(instance, id, ref value);
+                else return PropertyStream<Icon, ReactiveStream<PropertyId>>.Set(instance, id, ref value);
             }
         }
 
         [MethodImpl(OptimizationExtensions.ForceInline)]
-        public bool TryGet(object instance, out bool value)
+        public bool TryGet(object instance, out Icon value)
         {
             Surface sf; if ((sf = instance as Surface) != null)
             {
-                value = sf.Visible;
+                value = sf.Icon;
                 return true;
             }
             else
             {
                 TrayIcon ti; if ((ti = instance as TrayIcon) != null)
                 {
-                    value = ti.Visible;
+                    value = ti.Icon;
                     return true;
                 }
-                else return PropertyStream<bool, ReactiveStream<PropertyId>>.TryGet(instance, id, out value);
+                else return PropertyStream<Icon, ReactiveStream<PropertyId>>.TryGet(instance, id, out value);
             }
         }
 
@@ -82,24 +83,24 @@ namespace SE.Hyperion.Drawing
         {
             Surface sf; if ((sf = instance as Surface) != null)
             {
-                sf.Visible = Default;
+                sf.Icon = Default;
                 return true;
             }
             else
             {
                 TrayIcon ti; if ((ti = instance as TrayIcon) != null)
                 {
-                    ti.Visible = Default;
+                    ti.Icon = Default;
                     return true;
                 }
-                else return PropertyStream<bool, ReactiveStream<PropertyId>>.Clear(instance, id);
+                else return PropertyStream<Icon, ReactiveStream<PropertyId>>.Clear(instance, id);
             }
         }
 
         [MethodImpl(OptimizationExtensions.ForceInline)]
         public IDisposable Subscribe(IObserver<PropertyId> observer)
         {
-            return PropertyStream<bool, ReactiveStream<PropertyId>>.Subscribe(id, observer);
+            return PropertyStream<Icon, ReactiveStream<PropertyId>>.Subscribe(id, observer);
         }
     }
 }
