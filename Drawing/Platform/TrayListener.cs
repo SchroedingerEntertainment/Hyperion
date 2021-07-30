@@ -17,7 +17,7 @@ namespace SE.Hyperion.Drawing
         {
             TrayIcon tmp; if ((tmp = host as TrayIcon) != null)
             {
-                PropertyStream<Icon, ReactiveStream<PropertyId>>.Push(TrayIcon.IconProperty.Id | tmp);
+                PropertyStream<Icon, ReactiveStream<PropertyId>>.Push(TrayIcon.IconProperty.Id | tmp.Id);
             }
         }
 
@@ -26,7 +26,7 @@ namespace SE.Hyperion.Drawing
         {
             TrayIcon tmp; if ((tmp = host as TrayIcon) != null)
             {
-                PropertyStream<string, ReactiveStream<PropertyId>>.Push(TrayIcon.TooltipProperty.Id | tmp);
+                PropertyStream<string, ReactiveStream<PropertyId>>.Push(TrayIcon.TooltipProperty.Id | tmp.Id);
             }
         }
 
@@ -35,7 +35,7 @@ namespace SE.Hyperion.Drawing
         {
             TrayIcon tmp; if ((tmp = host as TrayIcon) != null)
             {
-                PropertyStream<bool, ReactiveStream<PropertyId>>.Push(TrayIcon.VisibleProperty.Id | tmp);
+                PropertyStream<bool, ReactiveStream<PropertyId>>.Push(TrayIcon.VisibleProperty.Id | tmp.Id);
             }
         }
     }

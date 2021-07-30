@@ -10,7 +10,7 @@ using SE.Reactive;
 
 namespace SE.Hyperion.Drawing
 {
-    public struct SurfaceListener
+    public partial struct SurfaceListener
     {
         [Multicast]
         public static void OnCreated([Implicit(true)] ISurfaceEventTarget host)

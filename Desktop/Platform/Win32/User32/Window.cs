@@ -23,7 +23,8 @@ namespace SE.Hyperion.Desktop.Win32
         public static extern IntPtr CreateWindowEx(WindowStylesEx styleEx, uint atom, string windowName, WindowStyles style, int x, int y, int width, int height, IntPtr parent, IntPtr menu, IntPtr instance, IntPtr param);
 
         [DllImport(User32, SetLastError = true)]
-        public static extern int SetWindowCompositionAttribute(IntPtr hwnd, ref WindowCompositionAttributeData data);
+        [return: MarshalAs(UnmanagedType.Bool)]
+        public static extern bool SetWindowCompositionAttribute(IntPtr hwnd, ref WindowCompositionAttributeData data);
 
         [DllImport(User32, SetLastError = true, CharSet = CharSet.Unicode)]
         public static extern IntPtr SetWindowLongPtr(IntPtr hwnd, WindowLongIndexFlags nIndex, IntPtr dwNewLong);

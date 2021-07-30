@@ -98,9 +98,9 @@ namespace SE.Hyperion.Drawing
         }
 
         [MethodImpl(OptimizationExtensions.ForceInline)]
-        public IDisposable Subscribe(IObserver<PropertyId> observer)
+        public IDisposable Subscribe(object owner, IObserver<PropertyId> observer)
         {
-            return PropertyStream<Icon, ReactiveStream<PropertyId>>.Subscribe(id, observer);
+            return PropertyStream<Icon, ReactiveStream<PropertyId>>.Subscribe(id, owner, observer);
         }
     }
 }

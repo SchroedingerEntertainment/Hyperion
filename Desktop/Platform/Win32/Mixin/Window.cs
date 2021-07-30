@@ -321,7 +321,7 @@ namespace SE.Hyperion.Desktop.Win32
             {
                 handle = hwnd;
 
-                SetTransparency(transparency);
+                SetTransparency(host as IAppearanceEventTarget, transparency);
                 if (eventTarget != null)
                 {
                     eventTarget.OnCreated();
@@ -616,7 +616,7 @@ namespace SE.Hyperion.Desktop.Win32
             else appearance = value;
         }
 
-        public void SetTransparency(Transparency value)
+        public void SetTransparency([Implicit] IAppearanceEventTarget target, Transparency value)
         {
             Transparency tmp = transparency;
             if (handle != IntPtr.Zero)
@@ -640,7 +640,14 @@ namespace SE.Hyperion.Desktop.Win32
                 else transparency = Transparency.None;
             }
             else transparency = value;
-            dirty = (transparency != tmp);
+            if (transparency != tmp)
+            {
+                if (target != null)
+                {
+                    target.OnTransparencyChanged(transparency);
+                }
+                dirty = true;
+            }
         }
         Transparency SetTransparencyGradient(Transparency mask)
         {
@@ -687,7 +694,10 @@ namespace SE.Hyperion.Desktop.Win32
             data.SizeOfData = policySize;
             data.Data = policyPtr;
 
-            SetWindowCompositionAttribute(handle, ref data);
+            if (!SetWindowCompositionAttribute(handle, ref data))
+            {
+                mask = transparency;
+            }
 
             Marshal.FreeHGlobal(policyPtr);
             return mask;
@@ -723,12 +733,14 @@ namespace SE.Hyperion.Desktop.Win32
             data.SizeOfData = policySize;
             data.Data = policyPtr;
 
-            SetWindowCompositionAttribute(handle, ref data);
+            if (!SetWindowCompositionAttribute(handle, ref data))
+            {
+                mask = transparency;
+            }
             Marshal.FreeHGlobal(policyPtr);
-
             if (mask == Transparency.Blur)
             {
-                SetTransparencyDWM(mask);
+                mask = SetTransparencyDWM(mask);
             }
             return mask;
         }
@@ -747,7 +759,8 @@ namespace SE.Hyperion.Desktop.Win32
                     goto default;
                 default:
                     {
-                        DwmEnableBlurBehindWindow(handle, ref nfo);
+                        if (DwmEnableBlurBehindWindow(handle, ref nfo) != 0)
+                            mask = transparency;
                     }
                     return mask;
             }

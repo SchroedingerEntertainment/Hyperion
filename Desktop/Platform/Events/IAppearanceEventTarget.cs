@@ -21,6 +21,12 @@ namespace SE.Hyperion.Desktop
         /// <summary>
         /// 
         /// </summary>
+        /// <param name="transparency"></param>
+        void OnTransparencyChanged(Transparency transparency);
+
+        /// <summary>
+        /// 
+        /// </summary>
         /// <param name="title"></param>
         void OnTitleChanged(string title);
 

@@ -15,6 +15,7 @@ namespace SE.Hyperion.Desktop.Win32
         public static extern int DwmIsCompositionEnabled(out bool enabled);
 
         [DllImport(DwmApi, SetLastError = true)]
-        public static extern void DwmEnableBlurBehindWindow(IntPtr hwnd, ref BlurBehind blurBehind);
+        [return: MarshalAs(UnmanagedType.U4)]
+        public static extern UInt32 DwmEnableBlurBehindWindow(IntPtr hwnd, ref BlurBehind blurBehind);
     }
 }

@@ -36,7 +36,7 @@ namespace SE.Hyperion.Drawing
             int hash = surface.GetHashCode();
 
             IDisposable sizeChanged = null;
-            sizeChanged = Surface.SizeProperty.Where((id) => id.ObjectId == hash).Subscribe(surface, (instance, id) =>
+            sizeChanged = Surface.SizeProperty.Subscribe(surface, (instance, id) =>
             {
                 Surface tmp = (instance as Surface);
                 if (tmp != null)
@@ -66,7 +66,7 @@ namespace SE.Hyperion.Drawing
 
             });
             IDisposable closeEvent = null;
-            closeEvent = Surface.CloseEvent.Where((id) => id.Sender == hash).Subscribe(surface, (instance, e) =>
+            closeEvent = Surface.CloseEvent.Subscribe(surface, (instance, e) =>
             {
                 closeEvent.Dispose();
                 close = true;
@@ -78,22 +78,16 @@ namespace SE.Hyperion.Drawing
             surface.Icon = ico;
             surface.Visible = true;
             surface.Initialize();
-            
-            long iconId = icon.Id;
-            IDisposable mouseEvent = null;
-            mouseEvent = TrayIcon.MouseEvent.Where((e) => e.Sender == iconId).Subscribe(surface, (instance, e) =>
+
+            PropertyId visibleProperty = Surface.VisibleProperty.Id | surface;
+            TrayIcon.MouseEvent.Subscribe(icon, (e) =>
             {
                 switch(TrayIcon.MouseEvent.GetData(ref e).Button)
                 {
                     case Desktop.MouseButton.Double:
                         {
-                            Surface tmp = (instance as Surface);
-                            if (tmp != null)
-                            {
-                                tmp.Visible = true;
-                                tmp.State = Desktop.WindowState.Normal;
-                            }
-                            else mouseEvent.Dispose();
+                            Surface.VisibleProperty.Set(surface, true);
+                            Surface.StateProperty.Set(surface, Desktop.WindowState.Normal);
                         }
                         break;
                 }

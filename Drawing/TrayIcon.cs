@@ -87,6 +87,24 @@ namespace SE.Hyperion.Drawing
         /// <param name="context"></param>
         public abstract void SetOwner(ITrayContext context);
 
+        public override bool Equals(object obj)
+        {
+            TrayIcon ico; if ((ico = obj as TrayIcon) != null)
+            {
+                return (ico.Id == Id);
+            }
+            else return false;
+        }
+        public override int GetHashCode()
+        {
+            return Id;
+        }
+
+        public override string ToString()
+        {
+            return base.ToString();
+        }
+
         /// <summary>
         /// 
         /// </summary>
