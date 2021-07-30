@@ -33,7 +33,6 @@ namespace SE.Hyperion.Drawing
             GraphicsPath path = new GraphicsPath();
 
             Surface surface = Surface.Create();
-            int hash = surface.GetHashCode();
 
             IDisposable sizeChanged = null;
             sizeChanged = Surface.SizeProperty.Subscribe(surface, (instance, id) =>
@@ -79,7 +78,6 @@ namespace SE.Hyperion.Drawing
             surface.Visible = true;
             surface.Initialize();
 
-            PropertyId visibleProperty = Surface.VisibleProperty.Id | surface;
             TrayIcon.MouseEvent.Subscribe(icon, (e) =>
             {
                 switch(TrayIcon.MouseEvent.GetData(ref e).Button)

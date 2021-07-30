@@ -42,7 +42,7 @@ namespace SE.Hyperion.Desktop.Win32
             public bool IsEmpty
             {
                 [MethodImpl(OptimizationExtensions.ForceInline)]
-                get { return (hash == 0 || label == null); }
+                get { return (hash == 0 || label == default(Label)); }
             }
 
             public LabelItem(int hash, WindowMessage key, Label label)
